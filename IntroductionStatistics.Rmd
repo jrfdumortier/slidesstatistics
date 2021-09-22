@@ -1,0 +1,60 @@
+---
+title: "Introduction to Statistics"
+author: "Jerome Dumortier"
+date: ""
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Uncertainty, Probability, and Statistics in Everyday Life
+Grades
+
+- Uncertainty surrounding class grade during a semester
+- Association of probabilities with each grade
+
+Fire station calls
+
+- Number and location of calls
+- Number of fire trucks and other vehicles required
+
+Two outcomes does not mean a 50\% chance for each to happen
+
+- Success of a free throw by Stephen Curry
+- Flight delay due to fog
+
+Netflix
+
+- Recording of all activities, e.g., browsing, pausing, rewinding
+- 75\% of viewings are based on recommendations by Netflix
+- [Do You Know When You Were Hooked? Netflix Does](https://media.netflix.com/en/press-releases/do-you-know-when-you-were-hooked-netflix-does)
+
+## Some Examples of Statistics in the News I
+Election outcomes
+
+   - 2016 U.S. Presidential Election
+     - FiveThirtyEight 2016 Election Forecast (chance of winning): Donald J. Trump 28.6\%
+     - [One explanation for the surprising result](http://news.harvard.edu/gazette/story/2017/03/nate-silver-says-conventional-wisdom-not-data-killed-2016-election-forecasts/)
+   - 2002 French Presidential Election
+     - Two-stage election
+     - Final round: Jacques Chirac (82.2\%) and Jean-Marie Le Pen (17.8\%)
+
+## Some Examples of Statistics in the News II
+Evolution of the stock market
+
+- Importance of correlation among stocks and mutual funds
+
+Path of a hurricane:
+        \begin{itemize}
+            \item \href{https://www.weather.gov/okx/HurricaneSandy}{Sandy (National Weather Service NWS)}
+            \item \href{https://www.nhc.noaa.gov/archive/2012/graphics/al18/loop_S.shtml}{Sandy (National Oceanic and Atmospheric Administration NOAA)}
+        \end{itemize}
+
+## Slide with Plot
+
+```{r pressure}
+plot(pressure)
+```
+
