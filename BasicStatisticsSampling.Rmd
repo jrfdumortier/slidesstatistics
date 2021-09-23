@@ -1,0 +1,188 @@
+---
+title: "Basic Statistics and Sampling"
+author: "Jerome Dumortier"
+date: "23 September 2021"
+output: beamer_presentation
+---
+
+## Lecture Overview
+Topics covered:
+
+- Law of Large Numbers
+- Central Limit Theorem
+
+## Law of Large Numbers
+Measuring unemployment rate in the United States
+
+- Current Population Survey (CPS)
+- Monthly survey among 60,000 households
+- Classification: *Employed*, *Unemployed*, *Not in the labor force*
+
+Law of large numbers
+
+- Any feature of a distribution can be recovered from repeated sampling.
+
+Example of flipping a coin:
+
+- Two possible outcomes: head or tail
+- Key condition: independence
+- Expected value of heads (or tails): $E(H)=E(T)=0.5$
+
+Difficulty to predict the share of heads from a single coin flip but high prediction precision from several thousand flips.
+
+## Law of Large Numbers: Flipping a Coin
+```{r, echo=FALSE,warning=FALSE}
+library(ggplot2)
+n   = 1000
+x   = sample(0:1,n,repl=T)
+s   = cumsum(x)
+r   = s/(1:n)
+lln = data.frame(trials=c(1:1000),heads=r)
+ggplot(lln,aes(x=trials,y=heads))+geom_line()+theme_bw()+ylab("Share of Heads")+ylim(0,1)+xlab("Trials")
+rm(n,x,s,r,lln)
+```
+
+## Refresher: Sample versus Population
+Why sampling is necessary:
+
+- Sampling the entire population may be expensive or impossible.
+- Sampling the entire population may be destructive (e.g., sampling all tires)
+
+Random sample:
+
+- Every item or person in the population (more specifically sample frame) has the same probability of getting selected into the sample.
+
+Example for polling before an election:
+
+- Every person with voting rights is in the sample frame and has the same chance of getting selected by a news agency for polling.
+
+## Estimation of the Mean and Variance
+Estimation of the population mean based on a sample:
+$$\bar{x} = \frac{1}{N} \sum^{N}_{i=1} x_i$$
+Estimation of the population variance based on a sample:
+$$s^2 = \frac{1}{N-1} \sum^{N}_{i=1} (x_i-\bar{x})^2$$
+And this is important:
+
+- In R, `var()` and `sd()` calculate the variance based on a sample, i.e., divide by $N-1$.
+
+## Illustration: Estimating the Population Variance I
+What we know about the population:
+
+- Population size: 100,000
+- Mean: $\mu=50$
+- Standard deviation: $\sigma=20$
+
+Sampling:
+
+- Sample size ranging from 2 to 50
+- Repeating the sampling 1000 times
+
+## Illustration: Estimating the Population Variance II
+```{r,echo=FALSE}
+pop       = rnorm(100000,mean=50,sd=20)
+n_nminus1 = matrix(0,1000,2)
+out       = matrix(0,50,2)
+for (j in 2:50){
+     for (i in 1:1000){
+          temp            = sample(pop,j)
+          n_nminus1[i,2]  = var(temp)
+          n_nminus1[i,1]  = var(temp)/j*(j-1)}
+     out[j,1] = mean(n_nminus1[,1])
+     out[j,2] = mean(n_nminus1[,2])}
+out                 = sqrt(out[2:50,])
+out1                = data.frame(Sample=c(2:50),Estimate=out[,1],Method="Dividing by N")
+out2                = data.frame(Sample=c(2:50),Estimate=out[,2],Method="Dividing by N-1")
+out                 = rbind(out1,out2)
+ggplot(out,aes(x=Sample,y=Estimate,color=Method))+geom_line(aes(color=Method))+theme_bw()+
+     ylim(0,25)+theme(legend.position="bottom")
+rm(n_nminus1,out,out1,out2,i,j,pop,temp)
+```
+
+
+## Sampling Distribution and Central Limit Theorem
+A statistic is a random variable (with its own probability distribution based) based on a sample. For example, repeated polling of 1,000 people about their political preferences will result in a different outcome each time. For the sampling distribution of the mean $\bar{x}$, we have the following:
+
+- Mean of the sampling distribution: $\mu_{\bar{X}}$
+- Variance of the sampling distribution: $\sigma^2_{\bar{X}}$
+- Standard deviation of the sampling distribution (commonly known as standard error): $\sigma_{\bar{X}}$
+
+Central Limit Theorem
+
+- Independent of the underlying distribution, as the sample size increases, the sampling distribution of the mean will follow a normal distribution.
+
+## Central Limit Theorem: Illustration
+```{r,echo=FALSE}
+pop_n               = 10000
+sample_n            = 500
+pop_uniform         = runif(pop_n,min=0,max=1)
+pop_poisson         = rpois(pop_n,lambda=5)
+pop_exponential     = rexp(pop_n,rate=1.5)
+pop_beta            = rbeta(pop_n,0.5,0.5)
+out                 = matrix(0,1000,4);
+for (i in 1:1000){
+     out[i,1]       = mean(sample(pop_uniform,sample_n))
+     out[i,2]       = mean(sample(pop_poisson,sample_n))
+     out[i,3]       = mean(sample(pop_exponential,sample_n))
+     out[i,4]       = mean(sample(pop_beta,sample_n))}
+  par(mfrow=c(2,4))
+    hist(pop_uniform,main="Population: Uniform",xlab="")
+    hist(out[,1],main="Sample: Uniform",xlab="")
+    hist(pop_poisson,main="Population: Poisson",xlab="")
+    hist(out[,2],main="sample: Poisson",xlab="")
+    hist(pop_exponential,main="Population: Exponential",xlab="")
+    hist(out[,3],main="Sample: Exponential",xlab="")
+    hist(pop_exponential,main="Population: Beta",xlab="")
+    hist(out[,4],main="Sample: Beta",xlab="")
+```
+
+## Central Limit Theorem: Implications for Estimation
+The standard error of the mean is:
+$$\sigma_{\bar{x}} = \sqrt{\frac{\sigma^2}{n}} =  \frac{\sigma}{\sqrt{n}}$$
+The sample standard deviation is the statistic defined by
+$$s=\sqrt{s^2}$$
+Suppose you have to predict the share of heads after flipping a coin multiple times. The variance of n coin flips is:
+$$\text{Var}(n) = \frac{p \cdot (1-p)}{n}$$
+
+Hence: $\text{Var}(1) = 0.5$, $\text{Var}(10) = 0.025$, $\text{Var}(1000) = 0.00025$, etc.
+
+## Application: Insurance Market
+Risk aversion for individuals as well as for firms. Why do insurance companies exist?
+
+- Why do insurance companies exist?
+
+Example:
+$$\text{Pr}(fire) = 1/250$$
+Simulation
+
+1. Simulate the damage of n homeowners
+2. Calculate the share
+3. Repeat 1,000 times
+4. Generate histogram
+
+## Insurance Market
+```{r,echo=FALSE}
+ndraws    = 1000;
+fireinsurance  = function(ninsur){
+     fire = matrix(0,ndraws,1)
+          for (i in 1:ndraws){
+               fg      <- sample(x=c(1,0),size=ninsur,replace=TRUE,prob=c(1/250,249/250))
+               fg      <- sum(fg)/ninsur
+               fire[i] <- fg}
+               return(fire)}
+fire1     = fireinsurance(1000)
+fire2     = fireinsurance(10000)
+fire3     = fireinsurance(25000)
+fire4     = fireinsurance(100000)
+par(mfrow=c(2,2))
+hist(fire1,xlim=c(0,0.025),ylim=c(0,750),main="1000 People Insured",xlab="",
+          breaks=seq(0,0.03,0.001))
+     hist(fire2,xlim=c(0,0.025),ylim=c(0,750),main="10000 People Insured",xlab="",
+          breaks=seq(0,0.03,0.001))
+     hist(fire3,xlim=c(0,0.025),ylim=c(0,750),main="25000 People Insured",xlab="",
+          breaks=seq(0,0.03,0.001))
+     hist(fire4,xlim=c(0,0.025),ylim=c(0,750),main="100000 People Insured",xlab="",
+          breaks=seq(0,0.03,0.001))
+```
+
+
+
