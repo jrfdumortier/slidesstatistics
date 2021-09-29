@@ -1,7 +1,7 @@
 ---
 title: "Basic Statistics and Sampling"
 author: "Jerome Dumortier"
-date: "23 September 2021"
+date: "`r format(Sys.time(),'%d %B %Y')`"
 output: beamer_presentation
 ---
 
@@ -12,20 +12,20 @@ Topics covered:
 - Central Limit Theorem
 
 ## Law of Large Numbers
-Measuring unemployment rate in the United States
+Measuring unemployment rate in the United States:
 
 - Current Population Survey (CPS)
 - Monthly survey among 60,000 households
 - Classification: *Employed*, *Unemployed*, *Not in the labor force*
 
-Law of large numbers
+Law of large numbers:
 
 - Any feature of a distribution can be recovered from repeated sampling.
 
 Example of flipping a coin:
 
-- Two possible outcomes: head or tail
-- Key condition: independence
+- Two possible outcomes: Heads or tails
+- Key condition: Independence
 - Expected value of heads (or tails): $E(H)=E(T)=0.5$
 
 Difficulty to predict the share of heads from a single coin flip but high prediction precision from several thousand flips.
@@ -46,7 +46,7 @@ rm(n,x,s,r,lln)
 Why sampling is necessary:
 
 - Sampling the entire population may be expensive or impossible.
-- Sampling the entire population may be destructive (e.g., sampling all tires)
+- Sampling the entire population may be destructive (e.g., sampling all tires).
 
 Random sample:
 
@@ -56,14 +56,14 @@ Example for polling before an election:
 
 - Every person with voting rights is in the sample frame and has the same chance of getting selected by a news agency for polling.
 
-## Estimation of the Mean and Variance
+## Estimation of the Sample Mean and the Sample Variance
 Estimation of the population mean based on a sample:
 $$\bar{x} = \frac{1}{N} \sum^{N}_{i=1} x_i$$
 Estimation of the population variance based on a sample:
 $$s^2 = \frac{1}{N-1} \sum^{N}_{i=1} (x_i-\bar{x})^2$$
 And this is important:
 
-- In R, `var()` and `sd()` calculate the variance based on a sample, i.e., divide by $N-1$.
+- In R, `var()` and `sd()` calculate the variance assuming a sample, i.e., division by $N-1$.
 
 ## Illustration: Estimating the Population Variance I
 What we know about the population:
@@ -100,7 +100,7 @@ rm(n_nminus1,out,out1,out2,i,j,pop,temp)
 
 
 ## Sampling Distribution and Central Limit Theorem
-A statistic is a random variable (with its own probability distribution based) based on a sample. For example, repeated polling of 1,000 people about their political preferences will result in a different outcome each time. For the sampling distribution of the mean $\bar{x}$, we have the following:
+A statistic is a random variable (with its own probability distribution) based on a sample. For example, repeated polling of 1,000 people about their political preferences will result in a different outcome each time. For the sampling distribution of the mean $\bar{x}$, we have the following:
 
 - Mean of the sampling distribution: $\mu_{\bar{X}}$
 - Variance of the sampling distribution: $\sigma^2_{\bar{X}}$
@@ -136,17 +136,17 @@ for (i in 1:1000){
 ```
 
 ## Central Limit Theorem: Implications for Estimation
-The standard error of the mean is:
+The standard error of the mean is given by:
 $$\sigma_{\bar{x}} = \sqrt{\frac{\sigma^2}{n}} =  \frac{\sigma}{\sqrt{n}}$$
-The sample standard deviation is the statistic defined by
+The sample standard deviation is the statistic defined by:
 $$s=\sqrt{s^2}$$
-Suppose you have to predict the share of heads after flipping a coin multiple times. The variance of n coin flips is:
+Suppose you have to predict the share of heads after flipping a coin multiple times. The variance of $n$ coin flips is:
 $$\text{Var}(n) = \frac{p \cdot (1-p)}{n}$$
 
 Hence: $\text{Var}(1) = 0.5$, $\text{Var}(10) = 0.025$, $\text{Var}(1000) = 0.00025$, etc.
 
 ## Application: Insurance Market
-Risk aversion for individuals as well as for firms. Why do insurance companies exist?
+Risk aversion for individuals as well as for firms.
 
 - Why do insurance companies exist?
 
@@ -154,7 +154,7 @@ Example:
 $$\text{Pr}(fire) = 1/250$$
 Simulation
 
-1. Simulate the damage of n homeowners
+1. Simulate the damage of $n$ homeowners
 2. Calculate the share
 3. Repeat 1,000 times
 4. Generate histogram

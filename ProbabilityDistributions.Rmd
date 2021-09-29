@@ -1,51 +1,51 @@
 ---
 title: "Probability Distributions"
 author: "Jerome Dumortier"
-date: "22 September 2021"
+date: "`r format(Sys.time(),'%d %B %Y')`"
 output: beamer_presentation
 ---
 
 ## Lecture Overview
-Random variables
+Random variables:
 
 - Probability distributions
 - Expected value (mean) and variance
 
-Discrete distributions
+Discrete distributions:
 
 - Bernoulli
 - Binomial
 - Poisson
 
-Continuous distributions
+Continuous distributions:
 
 - Uniform
 - Normal
 - *t*/Student
 
 ## Random Variables
-A random variable is a variable whose value depends on chance.
+A random variable is a variable whose value depends on chance:
 
 - Number of heads from flipping a coin 20 times
 - Number after rolling a die
 - Number of passengers showing up to a flight
 
-Discrete random variables
+Discrete random variables:
 
 - A random variable $X$ is discrete if it can assume only a finite or countable infinite number of distinct values
 
-Continuous random variables
+Continuous random variables:
 
 - Can take an infinite number of values
 
 ## Discrete versus continuous random variables
-Discrete random variables
+Discrete random variables:
 
 - Number of students in a class
 - Number of children in a family
 - Number of calls to a 911 dispatcher within a 24 hour period
 
-Continuous random variables
+Continuous random variables:
 
 - Temperature in a week from today
 - Value of the S&P 500
@@ -189,7 +189,7 @@ rm(profit,airfare,fee,i,p,seats,seatssold,x,profitfun)
 
 ## Poisson Distribution
 By construction, the Poisson distribution (named after Simeon Denis Poisson, 1781-1840) is used for count data, i.e., $0,1,2,\dots$. The probability mass function for the Poisson distribution is given by:
-$$P(X=k)=\frac{\lambda^k e^{-\lambda}}{k!}$$
+$$P(X=k)=\frac{\lambda^k \cdot e^{-\lambda}}{k!}$$
 An example of the Poisson distribution for different parameter values is shown on the next slide. 
 
 ## Poisson Distribution Example
@@ -228,10 +228,11 @@ Examples
 
 ## Uniform Distribution
 The uniform distribution has two parameters, i.e., $a$ and $b$. If $a<$b, a random variable $X$ is said to have a uniform probability distribution on the interval $(a,b)$ if and only if the density function of $X$ is
-$$f(x)=frac{1}{b-a}$$
+$$f(x)=\frac{1}{b-a}$$
 Examples:
+
 - $a=10$ and $b=40$ then $Pr(25<x<30)=1/6$
-- Arrival of your online delivery during your lunch break. 
+- Arrival of your online delivery during your lunch break
 
 ## Normal Distribution: Introduction
 The random variable $X$ is said to be normally distributed with mean $\mu$ and variance $\sigma^2$ (abbreviated by x $\sim$ N[$\mu$, $\sigma$$^{{ 2}}$] if the density function of x is given by
@@ -257,3 +258,23 @@ This can be achieved in one step with R:
 pnorm(70,75,10)-pnorm(60,75,10)
 ```
 
+## Student Distribution orn *t*-Distribution: Characteristics
+The t-distribution is very similar to the Standard Normal:
+
+- The t-distribution is continuous, symmetric, and bell-shaped.
+- The shape (flatness/steepness) depends on the degrees of freedom.
+- For very large degrees of freedom (i.e., $\infty$), the *t*-distribution is identical to the Standard Normal.
+
+The important aspect of the *t*-distribution are the tails which are weighted heavier.
+
+## Student Distribution orn *t*-Distribution: Graphical Representation
+```{r, echo=FALSE}
+x       = seq(-4,4,length=100)
+hx      = dnorm(x)
+degf    = c(1,3,8,30)
+colors  = c("red","blue","darkgreen","gold", "black")
+labels  = c("df=1","df=3","df=8","df=30","normal")
+plot(x,hx,type="l",lty=2,xlab="x value",ylab="Density",main="Comparison of t Distributions")
+for (i in 1:4){lines(x, dt(x,degf[i]), lwd=2, col=colors[i])}
+legend("topright",inset=.05,title="Distributions",labels,lwd=2,lty=c(1,1,1,1,2),col=colors)
+```
