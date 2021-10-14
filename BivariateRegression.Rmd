@@ -1,0 +1,272 @@
+---
+title: "Bivariate Regression"
+author: "Jerome Dumortier"
+date: "`r format(Sys.time(),'%d %B %Y')`"
+output: beamer_presentation
+---
+
+## Introduction
+General goal of a regression analysis:
+
+- Estimation of the expected mean of the dependent variable given particular values of the independent variable(s).
+
+Bivariate regression:
+
+- One dependent variable $y$ and one independent variable  $x$
+
+Find the best linear relationship between $y$ and $x$ assuming each observation $y_i$ is a function of $x_i$ plus a random error term $\epsilon_i$:
+$$y_i = \beta_0 + \beta_1 \cdot x_i + \epsilon_i$$
+We are looking for the conditional mean of $Y$ given $X$, i.e., $E(Y|X)$.
+$$E(Y|X) = \beta_0 + \beta_1 \cdot X$$
+
+## Components
+Example of the used car market:
+
+- Dependent variable: Price
+- Independent variable: Miles
+
+Every regression equation of the form $y = \beta_0 + \beta_1 \cdot x + \epsilon$  can be decomposed into four parts:
+
+- $y$: dependent variable
+- $x$: independent variables
+- $\beta_0$: intercept
+- $\beta_1$: slope coefficient associated with the independent variable
+
+The linear function does not tell us exactly what $y$ will be for a given value of $x$ but it does tell us the expected value of $y$, i.e., $E(y|x)$.
+
+## Least Square Estimation: Setup
+Given a particular observation $i$, we have
+$$y_i = \beta_0 + \beta_1 \cdot x_i + \epsilon_i$$
+Given two values of $\beta_0$ and $\beta_1$, i.e., $\hat{\beta}_0$ and $\hat{\beta}_1$, we can write
+$$y_i = \hat{\beta}_0 + \hat{\beta}_1 \cdot x_i + e_i$$
+where $e_i$ represents a ``correction factor'' (later, this will be the estimated residual) to achieve the observed $y_i$. Rearranging, we get
+$$e_i = y_i - \hat{\beta}_0 - \hat{\beta}_1 \cdot x_i$$
+Minimization of the sum of the squared residuals:
+$$\sum_{i=1}^N e_i^2 = \sum_{i=1}^N \left( y_{i} -\hat{\beta}_0 -\hat{\beta}_1 \cdot x_i \right)^2$$
+
+## Least Square Estimation: Optimal Solution
+Equations necessary to solve the bivariate regression model:
+
+- Mean of $x$: 
+    $$\bar{x}=\frac{1}{N}{\sum_{i=1}^{N} x_i}$$
+- Mean of $y$: 
+    $$\bar{y}=\frac{1}{N}{\sum_{i=1}^{N} y_i}$$
+- Slope coefficients: 
+    $$\hat{\beta_1} = \frac{\sum_{i=1}^{N} (x_i - \bar{x}) \cdot (y_i-\bar{y})}{\sum_{i=1}^{N} (x_i-\bar{x})^2}$$
+- Intercept: 
+    $$\hat{\beta_0} = \bar{y}-\beta_1 \cdot \bar{x}$$
+
+## Example: Home Values and Square Footage
+```{r,echo=FALSE}
+nobs           = 75
+sqft           = runif(n=nobs,min=1000,max=2000)
+price          = (50000+100*sqft+rnorm(n=nobs,mean=0,sd=40000))/1000
+bhat           = lm(price~sqft)
+par(mfrow=c(1,2))
+    plot(sqft,price,ylim=c(0,400),main="(a) Home Prices and Square Footage",
+         ylab="Price (in 1000 $)",xlab="Square Feet")
+    abline(bhat)
+    for(i in 1:nobs){
+         segments(sqft[i],price[i],sqft[i],bhat$fitted.values[i],lty=2,col="red")}
+    hist(bhat$residuals,main="(b) Histogram of Residuals ",xlab="Error Term",
+         xlim=c(-150,150),ylim=c(0,30),breaks = seq(-125,125,25))
+rm(bhat,i,nobs,price,sqft)
+```
+
+## Example: Used Cars
+
+| miles ($x$) | price ($y$) | $x_i-\bar{x}$ | $y_i-\bar{y}$ | $(x_i-\bar{x})(y_i-\bar{y})$ | $(x_i-\bar{x})^2$ |
+|------------:|------------:|--------------:|--------------:|-----------------------------:|------------------:|
+|          21 |          27 |           -15 |             6 |                          -90 |               225 |
+|          24 |          23 |           -12 |             2 |                          -24 |               144 |
+|          30 |          24 |            -6 |             3 |                          -18 |                36 |
+|          37 |          20 |             1 |            -1 |                           -1 |                 1 |
+|          43 |          19 |             7 |            -2 |                          -14 |                49 |
+|          47 |          16 |            11 |            -5 |                          -55 |               121 |
+|          50 |          18 |            14 |            -3 |                          -42 |               196 |
+
+We have $\bar{x} = 36$ and $\bar{y}=21$ as well as the following:
+$$\sum_{i=1}^N (x_i-\bar{x})(y_i-\bar{y})  = -244 \quad \text{and} \quad \sum_{i=1}^N (x_i-\bar{x})^2  = 772$$
+
+## Assumptions
+Important assumptions for unbiasedness of the coefficient estimates:
+
+- A1: Linear regression model, i.e., linear in terms of coefficients
+- A2: Zero mean value of error terms $\epsilon$, i.e., $E(\epsilon_i|x_i)=0$
+- A3: Homoscedasticity or equal variance of $\epsilon_i$, i.e., $Var(\epsilon_i) = \sigma^2$
+- A4: No autocorrelation between the error terms, i.e., $Cov(\epsilon_i,\epsilon_j)=0$
+- A5: No covariance between $\epsilon_i$ and $x_i$
+- A6: Number of observations is greater than number of parameters to be estimated
+- A7: No multicollinearity
+
+## A1: Linear Regression Model
+Regression model that is linear in parameters:
+$$y_i = \beta_0 + \beta_1 \cdot x_i + \epsilon$$
+Note that the following models are also linear in parameters:
+$$y_i = \beta_0 + \beta_1  \cdot x_i^2 + \epsilon$$
+$$y_i = \beta_0 + \beta_1 \cdot x_i + \beta_2 \cdot x_i^2 + \epsilon$$
+The following model is linear in parameters:
+$$y = e^{\beta_0 + \beta_1 \cdot x_i}$$
+The last model can be estimated by taking the natural logarithm of both sides.
+
+## A1: Linear Regression Model
+Despite the fact that the regression model is linear, non-linear relationships can be measured:
+
+- Relation between consumption and income might be non linear since a change in consumption due to extra income may decrease with income. 
+- Relationship between income and education can exhibit a non-linear form because a change in income due to more education may decrease with more education.
+
+## Example of Linear Regression Models
+```{r,echo=FALSE}
+fun1 = function(x){exp(b[1]+b[2]*log(x))}
+fun2 = function(x){b[1]+b[2]*x+b[3]*x^2+b[4]*x^3}
+par(mfrow=c(1,2))
+     b         = c(1,0.5)
+     main1     = expression("b"[1]*"=1, b"[2]*"=0.5")
+     curve(fun1,ylim=c(0,5),main=expression("log(y)=1+b"[2]*"log(x)"))
+     b         = c(2,1)
+     main2     = expression("b"[1]*"=2, b"[2]*"=1")
+     curve(fun1,add=TRUE,col="blue")
+     b         = c(3,3)
+     main3     = expression("b"[1]*"=2, b"[2]*"=3")
+     curve(fun1,add=TRUE,col="red")
+legend(0,5,legend=c(main1,main2,main3),fill=c("black","blue","red"),box.lty=0)
+     b         = c(1,1,1,0)
+     main1     = expression("b"[3]*"=1, b"[4]*"=0")
+     curve(fun2,col="black",ylim=c(0,5),main=expression("y=1+x+b"[3]*"x"^2*"+b"[4]*"x"^3))
+     b         = c(1,1,-1,0)
+     main2     = expression("b"[3]*"=-1, b"[4]*"=0")
+     curve(fun2,add=TRUE,col="blue")
+     b         = c(1,1,5,2)
+     main3     = expression("b"[3]*"=5, b"[4]*"=2")
+     curve(fun2,add=TRUE,col="red")
+legend(0,5,legend=c(main1,main2,main3),fill=c("black","blue","red"),box.lty=0)
+rm(list=ls())
+```
+
+## A2: Zero Mean Value of Error Terms
+Expected value of the error term is 0:
+$$E(\epsilon_i|X_i)=0 \quad \text{for all $i$}$$
+See the histogram of residuals a couple of slides back.
+
+## A3: Homoscedasticity
+The variance of the error terms is constant:
+$$Var(\epsilon_i | x_i) = E(\epsilon_i^2 |x_i) = \sigma^2$$
+The assumption of constant variance is known as homoscedasticity. A violation of this assumption represents heteroscedasticity. Consider the following examples:
+
+- Weekly consumption expenditures increases with income but the variability is higher with high-income families.
+
+Consequences:
+
+- No consequence on coefficient estimates
+- Inflated standard errors
+
+## A3: Homoscedasticity vs. Heteroscedasticity
+```{r,echo=FALSE}
+nobs           = 250
+x              = sort(runif(nobs,1500,3000))
+y_true         = 50000+70*x
+housing        = data.frame(y_true,x)
+housing$e_homo = 10000*rnorm(nobs)
+housing$e_hetr = 5000*rnorm(nobs,sd=seq(1,10,length.out=nobs))
+housing$y_homo = housing$y_true+housing$e_homo
+housing$y_hetr = housing$y_true+housing$e_hetr
+b_homo         = lm(y_homo~x,data=housing)
+b_hetr         = lm(y_hetr~x,data=housing)
+par(mfrow=c(1,2))
+    plot(x,housing$y_homo,ylim=c(100000,350000),main="Homoscedastic Data",ylab="Price",xlab="sqft.")
+    abline(b_homo)
+    plot(x,housing$y_hetr,ylim=c(100000,350000),main="Heteroscedastic Data",ylab="Price",xlab="sqft.")
+    abline(b_hetr)
+rm(list=ls())
+```
+
+## A4-A7: Other Assumptions
+A4: No autocorrelation between the disturbance terms
+$$E(\epsilon_i \epsilon_j) = 0 \quad \text{for all $i \neq j$}$$
+A5: No covariance between $\epsilon_i$ and $x_i$
+$$Cov(\epsilon_i,X_i) =  0$$
+A6: Full rank:
+
+- More observations than variables to be estimated
+- Analogy: You cannot solve for three unknowns with two equations
+
+A7: Multicollinearity:
+
+- Near perfect linear relationships between independent variables should be avoided
+
+## Application in R
+\scriptsize
+```{r,echo=FALSE}
+cars = data.frame(miles=c(21,24,30,37,43,47,50),price=c(27,23,24,20,19,16,18))
+summary(lm(price~miles,data=cars))
+rm(list=ls())
+```
+
+## $R^2$: Measuring the Strength of the Relationship I
+Goodness of fit measure decomposes the variation of $Y$ into two components, i.e., the (1) unexplained variation and the (2) explained variation: $R^2 \in [0,1]$. Unexplained or residual variation
+$$RSS = \sum_{i=1}^N (y_i-\hat{y}_i)^2$$
+Explained variation
+$$ESS = \sum_{i=1}^N (\hat{y}_i-\bar{y})^2$$
+Total variation:
+$$TSS = \sum_{i=1}^N (y_i-\bar{y})^2$$
+
+## $R^2$: Measuring the Strength of the Relationship II
+$R^2$ as the proportion of the total variation in $Y$ explained by independent variables. Note that since $TSS=RSS+ESS$:
+$$1 = \frac{RSS}{TSS}+\frac{ESS}{TSS}$$
+$R^2$ defined as
+$$R^2 = \frac{ESS}{TSS}=1-\frac{RSS}{TSS}$$
+Adjusted $R^2$ (for the case of multiple independent variables) where $k$ is the number of variables:
+$$\bar{R}^2 = 1-(1-R^2)\cdot \frac{n-1}{n-k}$$
+
+## Hypothesis Testing I
+Standard error for the slope coefficient:
+$$se(\hat{\beta}_1) = \frac{\sigma}{\sqrt{\sum_{i=1}^N (x_i-\bar{x})^2}}$$
+Standard error for the intercept:
+$$se(\hat{\beta}_0) = \sqrt{\frac{\sum_{i=1}^N x_i^2}{n \sum_{i=1}^N (x_i-\bar{x})^2}} \sigma$$
+Estimate for the variance:
+$$\hat{\sigma}^2 = \frac{\sum_{i=1}^N e_i^2}{n-2}$$
+
+## Hypothesis Testing II
+Determination of statistical significance between variables:
+
+- Assumption of normally distributed error terms
+- $t$-statistic with $n-2$ degrees of freedom
+
+Specific hypothesis tests are H$_0$: $\beta_0 = 0$ and H$_0$: $\beta_1 = 0$. The test statistic for $\beta_i$ can be written as
+$$\frac{\hat{\beta}_i-\beta_i}{se_{\hat{\beta}_i}} \sim t_{n-2}$$
+The hypothesis test is never conducted manually and every statistical software conducts and reports the results of the hypothesis test.
+
+## Numerical Example: Post Estimation
+
+| miles ($x$) | price ($y$) | $x_i^2$ | $\hat{y}$ | $e_i$ | $e_i^2$ | $(y_i-\bar{y})^2$ |
+|------------:|------------:|--------:|----------:|------:|--------:|------------------:|
+|          21 |          27 |     441 |     25.74 |  1.26 |    1.59 |                36 |
+|          24 |          23 |     576 |     24.79 | -1.79 |    3.21 |                 4 |
+|          30 |          24 |     900 |     22.90 |  1.10 |    1.22 |                 9 |
+|          37 |          20 |    1369 |     20.68 | -0.68 |    0.47 |                 1 |
+|          43 |          19 |    1849 |     18.79 |  0.21 |    0.05 |                 4 |
+|          47 |          16 |    2209 |     17.52 | -1.52 |    2.32 |                25 |
+|          50 |          18 |    2500 |     16.58 |  1.42 |    2.03 |                 9 |
+
+Note that $\sum e_i^2=10.89$, $\sum x_i^2=10.89$ $\sum (y_i-\bar{y})^2 = 88$
+
+## Numerical Example: $R^2$ and Standard Errors
+Goodness of fit $R^2$:
+$$R^2 = 1 - \frac{10.89}{88}= 0.876$$
+For the standard errors, we have $\hat{\sigma} = \sqrt{10.89/5} = 1.476$ and thus,
+$$se(\hat{\beta}_0)  = \sqrt{\frac{9844}{7 \cdot 772}} \cdot 1.476 = 1.99$$
+$$se(\hat{\beta}_1)  = \frac{1.476}{\sqrt{772}} = 0.053$$
+Adjusted $R^2$:
+$$\bar{R}^2 = 1-(1-0.876)\cdot 6/5 = 0.8512$$
+The manual calculations match the output from R.
+
+## Used Car Market: R/RStudio Output
+```{r,echo=FALSE,warning=FALSE,results=FALSE}
+load("G:/My Drive/Teaching/Data Analysis for Public Affairs/GitHub/DataAnalysisPAData.RData")
+```
+
+\footnotesize
+```{r}
+bhat = lm(price~miles,data=honda)
+summary(bhat)
+```
