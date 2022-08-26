@@ -1,51 +1,74 @@
 ---
-title: "Probability Distributions"
+title: "Probability"
 author: "Jerome Dumortier"
 date: "`r format(Sys.time(),'%d %B %Y')`"
-output: beamer_presentation
+output: 
+     beamer_presentation:
+          theme: "Hannover"
+classoption: "aspectratio=1610"
+linkcolor: MidnightBlue
 ---
 
-## Basic Concepts of Probability
+# Basic Concepts
+## Overview I
 Sample space
-  - A sample space is a list of all possible outcomes of an experiment.
-  - Notation: $\Omega$
+
+- A sample space is a list of all possible outcomes of an experiment.
+- Notation: $\Omega$
+
 Examples of a sample space:
-  - Rolling a single die: $\Omega = \{1,2,3,4,5,6\}$
-  - Tossing a coin: $\Omega = \{H,T\}$
-  - Grades: $\Omega = \{A+,A,A-, \dots, F\}$
-  - Number of calls to a fire station in a 24-hour period: $\Omega = \{0,1,2 \dots \}$
+
+- Rolling a single die: $\Omega = \{1,2,3,4,5,6\}$
+- Tossing a coin: $\Omega = \{H,T\}$
+- Grades: $\Omega = \{A+,A,A-, \dots, F\}$
+- Number of calls to a fire station in a 24-hour period: $\Omega = \{0,1,2 \dots \}$
+
 What about tomorrow's temperature?
     
-## Basic Concepts of Probability
+## Overview II
 Event
-  - Subset of the sample space
+
+- Subset of the sample space
+
 Examples
-  - Event $E$: Rolling a die and getting an even number
+
+- Event $E$: Rolling a die and getting an even number
       $$E = \{2,4,6\}$$
-  - Event $S$: Rolling a number less or equal to four
+- Event $S$: Rolling a number less or equal to four
       $$S = \{1,2,3,4\}$$
-  - Event $F$: More than five calls to the fire station
+- Event $F$: More than five calls to the fire station
       $$F = \{5,6,\dots \}$$
 
 ## Set Notation and Set Operations
 Intersection
-  - The intersection $W$ of two sets $X$ and $Y$ is the set of elements that are in both $X$ and $Y$. We write $W=X\cap Y$.
+
+- The intersection $W$ of two sets $X$ and $Y$ is the set of elements that are in both $X$ and $Y$. We write $W=X \cap Y$.
+
 Empty or Null Sets
-  - The empty set or the null set ($\emptyset$) is the set with no elements. For example, if the sets $A$ and $B$ contain no common elements then these two sets are said to be disjoint, e.g., odd and even numbers: $ A\cap B=\emptyset$.
+  
+- The empty set or the null set ($\emptyset$) is the set with no elements. For example, if the sets $A$ and $B$ contain no common elements then these two sets are said to be disjoint, e.g., odd and even numbers: $A \cap B=\emptyset$.
+
 Unions
-  - The union of two sets $A$ and $B$ is the set of all elements in one or the other of the sets. We write $ C=A\cup B$.
+
+- The union of two sets $A$ and $B$ is the set of all elements in one or the other of the sets. We write $C=A \cup B$.
+  
 Complements
-  - The complement of a set $X$ is the set of elements of the universal set $U$ that are not elements of $X$, and is written $X^{c}$.
+
+- The complement of a set $X$ is the set of elements of the universal set $U$ that are not elements of $X$, and is written $X^{c}$.
 
 ## Probability Concepts
 Probability defined for a discrete sample space:
-  - The probability of an event is a non-negative number, i.e., $P(A) \geq 0$, for any subset $A$ of $\Omega$.
-  - $P(\Omega) = 1$: All the probabilities of the outcomes in the sample space sum up to 1.
+
+- The probability of an event is a non-negative number, i.e., $P(A) \geq 0$, for any subset $A$ of $\Omega$.
+- $P(\Omega) = 1$: All the probabilities of the outcomes in the sample space sum up to 1.
+
 If $A,B,C,\dots$ is a finite or infinite sequence of mutually exclusive events of $\Omega$, i.e., events that cannot happen at the same time, then we have
   $$P\left(A \cup B \cup C \cup\cdots\right)=P(A)+P(B)+P(C)+\cdots$$
+
 Example: Coin flip
-  - Sample space: $\Omega = \{H,T\}$
-  - $P(H) = 0.5$ and $P(T) = 0.5$
+
+- Sample space: $\Omega = \{H,T\}$
+- $P(H) = 0.5$ and $P(T) = 0.5$
 
 ## Probability Example: Flipping a Coin Three Times
 The eight events in $\Omega$ are:
@@ -55,28 +78,29 @@ $$A=\{E_2,E_3,E_5\}$$
 We find $P(A)$ by summing as follows
 $$P(A)=P(E_{2})+P(E_{3})+P(E_{5})=\frac{1}{8} +\frac{1}{8} +\frac{1}{8} =\frac{3}{8}$$
 
-## Probability of a Union
+# Probability of a Union
+## Overview
 For any two events $A$ and $B$, we have
 $$P(A \cup B) = P(A)+P(B)-P(A \cap B)$$
 Examples:
 
-  - Alcohol and cocaine consumption
-  - Safety checks by the police
-  - On-time arrival of airplanes
+- Alcohol and cocaine consumption
+- Safety checks by the police
+- On-time arrival of airplanes
 
-## Probability of a Union: Alcohol and Cocaine Consumption
+## Alcohol and Cocaine Consumption
 Consider the blood content of randomly selected people. Define the following events: $A = \{Alcohol\}$, $B= \{Cocaine \}$, and $A \cap B = \{Both \}$. The probabilities are as follows: $P(A) =0.86$, $P(B) =0.35$, and $P(A \cap B) = 0.29$. To calculate the probability of finding either alcohol or cocaine or both in the blood stream, you need to perform the following calculation:
 $$P(A \cup B) = 0.86+0.35-0.29 = 0.92$$
 Intrigued by this example? Check out this [EU Project](https://www.emcdda.europa.eu/topics/pods/waste-water-analysis_en).
 
-## Probability of a Union: Safety checks by the police
+## Safety checks by the police
 Highway patrols are randomly checking the safety of trucks. Assume the following events:
 $$A =\{\text{faulty breaks}\}$$
 $$B =\{\text{bad tires}\} $$
 $$A \cup B =\{\text{faulty breaks and/or bad tires}\}$$
 Let $P(A)=0.23$, $P(B)=0.24$, and $P(A \cap B)=0.09$. Thus, we can determine that $P(A \cup B)=0.23+0.24-0.09=0.38$.
 
-## Probability of a Union: On-time arrival of airplanes
+## On-time arrival of airplanes
 If the events are mutually exclusive, the term $P(A \cap B)$ is equal to 0. Gate arrival of airplanes during a week at a mid-sized airport. Everyting not within +/- 10 minutes is considered ``Not on Time.''
 
 | Arrival                    | Event | Flights | Probability |
@@ -87,150 +111,123 @@ If the events are mutually exclusive, the term $P(A \cap B)$ is equal to 0. Gate
 
 What is the probability that an airplane is not arriving on time at the gate.
 
-## Probability of an Intersection: Independent Events
+# Probability of an Intersection
+## Independent Events
 To find the probability that events $A$ and $B$ occur, we have to use the multiplication rule (i.e., probability of the intersection) which is written as
 $$P(A \cap B) = P(A) \cdot P(B)$$
 For the multiplication rule to hold, the two events must be independent!
 
-## Probability of an Intersection}{Rolling a Die and Drawing Cards}
+## Rolling a Die and Drawing Cards
 Rolling a die
 
-  - Suppose you are interested in the probability of getting a 6 on roll 1 (event $A$) and a 6 on roll 2 (event $B$). This is written as $P(A) \cdot P(B) = 1/6 \cdot 1/6 = 1/36$.
+- Suppose you are interested in the probability of getting a 6 on roll 1 (event $A$) and a 6 on roll 2 (event $B$). This is written as $P(A) \cdot P(B) = 1/6 \cdot 1/6 = 1/36$.
 
 Drawing cards
-            - Let $A=\{Hearts\}$ and $B=\{Queen\}$. The joint probability is the likelihood of drawing the Queen of Hearts and is written as:
-                    $$P(A) &= \frac{1}{4}$$
-                     $$ P(B) &= \frac{4}{52}$$
-                     $$ P(A \cap B) &= P(A) \cdot P(B) = \frac{1}{52}$$
-                    \end{align*}
 
-## Probability of an Intersection}{Dependent Events}
-    For the multiplication rule to hold, the two events must be independent! The multiplication rule for dependent events will be introduced in more detail later but can be written as $P(A \cap B) = P(A) \cdot P(B|A)$ where $P(B|A)$ is the probability of $A$ given that even $B$ occurred.
+- Let $A=\{Hearts\}$ and $B=\{Queen\}$. The joint probability is the likelihood of drawing the Queen of Hearts and is written as:
+$$P(A) = \frac{1}{4}$$
+$$ P(B) = \frac{4}{52}$$
+$$ P(A \cap B) = P(A) \cdot P(B) = \frac{1}{52}$$
 
-## Probability of an Intersection}{Dependent Events: Example}
-    Suppose you have 16 polo shirts in your closet with your company's logo. Nine of them are green and seven are blue. In the morning, you get dressed when it is dark and you randomly grab a shirt two days in a row (without doing laundry). What is the probability that both shirts are blue.
-        \begin{align*}
-            P(B_1) &= 7/16\\
-            P(B_2|B_1) &= 6/15
-        \end{align*}
-    Thus, $P(B_1 \cap B_2) = P(B_1) \cdot P(B_2|B_1) = 7/16 \cdot 6/15 = 0.175$.
+## Dependent Events
+For the multiplication rule to hold, the two events must be independent! The multiplication rule for dependent events will be introduced in more detail later but can be written as $P(A \cap B) = P(A) \cdot P(B|A)$ where $P(B|A)$ is the probability of $A$ given that even $B$ occurred.
 
-## Conditional Probability}
-\begin{frame}{Conditional Probability}{Examples}
-    Conditional probability
-        \begin{itemize}
-            - Probability of event $A$ given that event $B$ happened
-            - Notation: $P(A|B)$
-        \end{itemize}
-    Examples:
-            - Probability of a person earning more than \$150,000 given graduation from Harvard Law School
-            - Probability of a person getting arrested given a prior arrest
-            - Probability of getting an ``A'' in graduate statistics given an undergraduate degree in mathematics
-            - Probability of receiving a grant from a funding agency given prior funding from the same agency
+## Dependent Events: Example
+Suppose you have 16 polo shirts in your closet with your company's logo. Nine of them are green and seven are blue. In the morning, you get dressed when it is dark and you randomly grab a shirt two days in a row (without doing laundry). What is the probability that both shirts are blue.
+$$P(B_1) = 7/16$$
+$$P(B_2|B_1) = 6/15$$
+Thus, $P(B_1 \cap B_2) = P(B_1) \cdot P(B_2|B_1) = 7/16 \cdot 6/15 = 0.175$.
 
-## Conditional Probability}{Concept}
-    Given event $B$ such that $P(B)>0$ and any other event $A$, we define the conditional probability of $A$ given $B$ as
-        $$
-            P(A|B)=\frac{P(A\cap B)}{P(B)}
-        $$
+# Conditional Probability
+## Examples
+Conditional probability
 
-## Conditional Probability}{Example}
-    \begin{table}[h!]
-        \begin{center}
-            \begin{tabular}{lcc} \toprule
-                            & Good Service  & Bad Service   \\ \midrule
-            Over 10 years   & 16            & 4             \\
-            Below 10 years  & 10            & 20            \\ \bottomrule
-            \end{tabular}
-        \end{center}
-    \end{table}
-    Questions:
-        \begin{itemize}
-            - What is the probability of receiving good service, i.e., $P(G)$?
-            - What is the probability of receiving good service given more than 10 years of service, i.e., $P(G|\text{Over 10 years})$?
+- Probability of event $A$ given that event $B$ happened
+- Notation: $P(A|B)$
 
-## Conditional Probability}{Multiplication Rule}
-    Rearrangement of the terms from the conditional probability definition leads to:
-        $$
-            P(A\cap B) = P(A|B) \cdot P(B)
-        $$
+Examples:
+
+- Probability of a person earning more than \$150,000 given graduation from Harvard Law School
+- Probability of a person getting arrested given a prior arrest
+- Probability of getting an "A" in graduate statistics given an undergraduate degree in mathematics
+- Probability of receiving a grant from a funding agency given prior funding from the same agency
+
+## Concept
+Given event $B$ such that $P(B)>0$ and any other event $A$, we define the conditional probability of $A$ given $B$ as
+$$P(A|B)=\frac{P(A\cap B)}{P(B)}$$
+
+## Example
+
+|                | Good service | Bad Service |
+|----------------|:------------:|:-----------:|
+| Over 10 years  |      16      |      4      |
+| Below 10 years |      10      |      20     |
+
+Questions:
+
+- What is the probability of receiving good service, i.e., $P(G)$?
+- What is the probability of receiving good service given more than 10 years of service, i.e., $P(G|\text{Over 10 years})$?
+
+## Multiplication Rule
+Rearrangement of the terms from the conditional probability definition leads to:
+$$P(A\cap B) = P(A|B) \cdot P(B)$$
 Multiplication rule example:
-    \begin{itemize}
-        - $P(\text{Over 10 years})$: Probability of being in business for over 10 years
-        - $P(G|\text{Over 10 years})$: Probability of receiving good service given more than 10 years of service
-    \end{itemize}
 
-## Conditional Probability}{Example 1: Rolling a Die}
-    What is the probability of a 1, given that an odd number was obtained?
-            - Event A: Observe a 1.
-            - Event B: Observe an odd number.
-    We seek the probability of $A$ given that the event $B$ has occurred. The event $A\cap B$ requires the observance of both a 1 and an odd number. In this instance, $A\subset B$ so $A\cap B = A$ and $P(A \cap B) = P(A) =1/6$. Also, $P(B) = 1/2$ and, using the definition,
-        $$
-        P(A|B) = \frac{P(A \cap B)}{P(B)} =\frac{1/6}{1/2} = \frac{1}{3}
-        $$
-\end{frame}
-%========================================================================================================================================
-\begin{frame}{Conditional Probability}{Example 2: Box and Balls}
-    Suppose a box contains $r$ red balls labeled $1,2,3,\cdots,r$ and $b$ black balls labeled $1,2,3,\cdots,b$. If a ball from the box is known to be red, what is the probability it is the red ball labeled 1, i.e., $P(B|A)$?
-        \begin{itemize}
-            - Event A: Observe a red ball.
-            - Event B: Observe a 1.
-        \end{itemize}
-    Probability of $A$:
-        $$
-            P(A)=\frac{r}{r+b}
-        $$
-    Probability of a red ball with the number 1 on it:
-        $$
-            P(A \cap B)={\frac{1}{r+b}}
-        $$
-\end{frame}
-%========================================================================================================================================
-\begin{frame}{Conditional Probability}{Example 2: Box and Balls (continued)}
-    Then the probability that the ball is red and labeled 1 given that it is red is given by
-        $$
-            P(B|A)=\frac{P(A\cap B)}{P(A)} =\frac{1/(r+b)}{r/(r+b)} = \frac{1}{r}
-        $$
-    This differs from the probability of $B$ (a 1 on the ball) which is given by
-        $$
-        P(B)=\frac{2}{r+b}
-        $$
-\end{frame}
-%========================================================================================================================================
-\section{Independence}
-\begin{frame}{Independence}{Concept}
-    Two events are said to be independent if
-        $$
-            P(A\cap B)=P(A)P(B)
-        $$
-    If $P(B)>0$ (or $P(A)>0$), this can be written in terms of conditional probability as
-        \begin{align*}
-            P(A|B)&=P(A)\\
-            P(B|A)&=P(B)
-        \end{align*}
-    The events $A$ and $B$ are independent if knowledge of $B$ does not affect the probability of $A$.
-\end{frame}
-%========================================================================================================================================
-\begin{frame}{Independence}{Example I: Setup and Calculation}
-    Rolling a red die and a green die
-        \begin{itemize}
-            - Event A: 4 on the red die.
-            - Event B: Sum of the dice is odd.
-        \end{itemize}
-    Are $A$ and $B$ independent? Consider Table \ref{table:independence1} on the next slide illustrating the probabilities and calculations below:
-        \begin{align*}
-            P(A) &= 6/36 = 1/6\\
-            P(B) &= 18/36 = 1/2\\
-            P(A \cap B) &= 3/36 = 1/2
-        \end{align*}
-    This leads to
-        $$
-          P(A|B) = \frac{P(A \cap B)}{P(B)}=\frac{3/36}{1/2}=\frac{1}{6}
-        $$
-    The events $A$ and $B$ are thus independent.
-\end{frame}
-%========================================================================================================================================
-\begin{frame}{Independence}{Example I: Visual Representation}
+- $P(\text{Over 10 years})$: Probability of being in business for over 10 years
+- $P(G|\text{Over 10 years})$: Probability of receiving good service given more than 10 years of service
+
+## Example 1: Rolling a Die
+What is the probability of a 1, given that an odd number was obtained?
+
+- Event A: Observe a 1.
+- Event B: Observe an odd number.
+    
+We seek the probability of $A$ given that the event $B$ has occurred. The event $A\cap B$ requires the observance of both a 1 and an odd number. In this instance, $A\subset B$ so $A\cap B = A$ and $P(A \cap B) = P(A) =1/6$. Also, $P(B) = 1/2$ and, using the definition,
+$$P(A|B) = \frac{P(A \cap B)}{P(B)} =\frac{1/6}{1/2} = \frac{1}{3}$$
+
+## Example 2: Box and Balls
+Suppose a box contains $r$ red balls labeled $1,2,3,\cdots,r$ and $b$ black balls labeled $1,2,3,\cdots,b$. If a ball from the box is known to be red, what is the probability it is the red ball labeled 1, i.e., $P(B|A)$?
+
+- Event A: Observe a red ball.
+- Event B: Observe a 1.
+
+Probability of $A$:
+$$P(A)=\frac{r}{r+b}$$
+Probability of a red ball with the number 1 on it:
+$$P(A \cap B)={\frac{1}{r+b}}$$
+
+## Example 2: Box and Balls (continued)
+Then the probability that the ball is red and labeled 1 given that it is red is given by
+$$P(B|A)=\frac{P(A\cap B)}{P(A)} =\frac{1/(r+b)}{r/(r+b)} = \frac{1}{r}$$
+This differs from the probability of $B$ (a 1 on the ball) which is given by
+$$P(B)=\frac{2}{r+b}$$
+
+# Independence
+## Concept
+Two events are said to be independent if
+$$P(A\cap B)=P(A) \cdot P(B)$$
+If $P(B)>0$ (or $P(A)>0$), this can be written in terms of conditional probability as
+$$P(A|B)=P(A)$$
+$$P(B|A)=P(B)$$
+The events $A$ and $B$ are independent if knowledge of $B$ does not affect the probability of $A$.
+
+## Example I: Setup and Calculation
+Rolling a red die and a green die
+
+- Event A: 4 on the red die.
+- Event B: Sum of the dice is odd.
+
+Are $A$ and $B$ independent? Consider the table on the next slide illustrating the probabilities and calculations below:
+
+$$P(A) = 6/36 = 1/6$$
+$$P(B) = 18/36 = 1/2$$
+$$P(A \cap B) = 3/36 = 1/2$$
+This leads to
+$$P(A|B) = \frac{P(A \cap B)}{P(B)}=\frac{3/36}{1/2}=\frac{1}{6}$$
+The events $A$ and $B$ are thus independent.
+
+## Example I: Visual Representation
+```{=latex}
     \begin{table}
         \begin{center}
             \begin{tabular}{ccccccc}\toprule
@@ -244,30 +241,24 @@ Multiplication rule example:
             6 & 6,1 & 6,2 & 6,3 & 6,4 & 6,5 & 6,6 \\ \bottomrule
             \end{tabular}
         \end{center}
-        \caption{First number in pair is number on red die.}
-        \label{table:independence1}
     \end{table}
-\end{frame}
-%========================================================================================================================================
-\begin{frame}{Independence}{Example II: Setup and Calculation}
-    Rolling a red die and a green die
-        \begin{itemize}
-            - Event C: At least three dots
-            - Event D: Sum equal to seven
-        \end{itemize}
-    Are $C$ and $D$ independent? Consider Table \ref{table:independence2} on the next slide illustrating the probabilities and calculations below:
-        \begin{align*}
-            P(C) &= \frac{32}{36}\\
-            P(D) &= \frac{1}{6}
-        \end{align*}
-    This leads to
-        $$
-          P(C|D) = \frac{P(C \cap D)}{P(D)}=\frac{6/36}{6/36}=1
-        $$
-    Thus, the two events are dependent.
-\end{frame}
-%========================================================================================================================================
-\begin{frame}{Independence}{Example II: Visual Representation}
+```
+
+## Example II: Setup and Calculation
+Rolling a red die and a green die
+
+- Event C: At least three dots
+- Event D: Sum equal to seven
+
+Are $C$ and $D$ independent? Consider the table on the next slide illustrating the probabilities and calculations below:
+$$P(C)=\frac{32}{36}$$
+$$P(D)= \frac{1}{6}$$
+This leads to
+$$P(C|D) = \frac{P(C \cap D)}{P(D)}=\frac{6/36}{6/36}=1 $$
+Thus, the two events are dependent.
+
+## Example II: Visual Representation
+```{=latex}
     \begin{table}
         \begin{center}
             \begin{tabular}{ccccccc}\toprule
@@ -284,71 +275,55 @@ Multiplication rule example:
         \caption{All pairs except the \textcolor{lightgray}{lightgray} ones are in event $C$. The pairs in \textcolor{cyan}{blue} are in event $D$.}
         \label{table:independence2}
     \end{table}
-\end{frame}
-%========================================================================================================================================
-\section{Bayes Rule}
-\begin{frame}{Law of Total Probability and Bayes Rule}{Cows and bovine spongiform encephalopathy (BSE)}
-    Events
-        \begin{itemize}
-            - $B$: Cow has BSE
-            - $T$: Cow tests positive
-        \end{itemize}
-    Assume the following probabilities:
-        \begin{itemize}
-            - $P(T|B) = 0.7$
-            - $P(T|B^C) = 0.1$
-            - $P(B) = 0.02$
-            - $P(B^C) = 0.98$
-        \end{itemize}
-   What is $P(T) = P(T|B) \cdot P(B) + P(T|B^C) \cdot P(B^C)$?
-\end{frame}
-%========================================================================================================================================
-\begin{frame}{Law of Total Probability and Bayes Rule}{Cows and bovine spongiform encephalopathy (BSE)}
-    Remember from conditional probability
-        \begin{gather*}
-            P(T|B) = \frac{P(T \cap B )}{P(B)} \\
-            P(T|B^C) = \frac{P(T \cap B^C )}{P(B^C)}
-        \end{gather*}
-    Question
-        \begin{itemize}
-            - What is the probability that a cow has BSE if it tests positive, i.e., $P(B|T)$?
-        \end{itemize}
-    Solution
-        \begin{align*}
-            P(B|T)      & = \frac{P(T \cap B )}{P(T)} \\
-                        & = \frac{P(T|B) \cdot P(B)}{P(T|B) \cdot P(B) + P(T|B^C) \cdot P(B^C)}
-        \end{align*}
-\end{frame}
-%========================================================================================================================================
-\section{Permutations and Combinations}
-\begin{frame}{Permutations}{Ordered Arrangement}
-    A ordered arrangement of $r$ distinct objects is called a permutation. The number of ways of ordering $n$ distinct objects taken $r$ at a time is distinguished by the symbol $P_{r}^{n}$
+```
+
+# Bayes Rule
+## Law of Total Probability and Bayes Rule I
+Cows and bovine spongiform encephalopathy (BSE). Let the events be as follows:
+
+- $B$: Cow has BSE
+- $T$: Cow tests positive
+
+Assume the following probabilities:
+    
+- $P(T|B) = 0.7$
+- $P(T|B^C) = 0.1$
+- $P(B) = 0.02$
+- $P(B^C) = 0.98$
+
+What is $P(T) = P(T|B) \cdot P(B) + P(T|B^C) \cdot P(B^C)$?
+
+## Law of Total Probability and Bayes Rule II
+Remember from conditional probability
+
+- $P(T|B) = \frac{P(T \cap B )}{P(B)}$
+- $P(T|B^C) = \frac{P(T \cap B^C )}{P(B^C)}$
+
+Question
+
+- What is the probability that a cow has BSE if it tests positive, i.e., $P(B|T)$?
+    
+Solution
+$$P(B|T)=\frac{P(T \cap B )}{P(T)}=\frac{P(T|B) \cdot P(B)}{P(T|B) \cdot P(B)+P(T|B^C) \cdot P(B^C)}$$
+ 
+# Permutations and Combinations
+## Permutations: Ordered Arrangement
+A ordered arrangement of $k$ distinct objects is called a permutation. The number of ways to order $n$ distinct objects taken $k$ at a time is distinguished by the symbol $P_{k}^{n}$
+$$P_{k}^{n} =n \cdot (n-1) \cdot (n-2) \cdot (n-3) \cdots (n-k+1)=\frac{n!}{(n-k)!}$$
+where
+$$n! = n \cdot (n - 1) \cdot (n - 2) \cdot (n - 3) \cdots 2 \cdot 1$$
+and $0!=1$.
+
+## Permutations: Example
+Consider a bowl containing six balls with the letters $A$, $B$, $C$, $D$, $E$, $F$ on the respective balls. Now consider an experiment where you draw one ball from the bowl and write down its letter and then draw a second ball and write down its letter. The outcome is than an ordered pair, i.e., $BA \neq AB$. The number of distinct ways of doing this is given by
+$$P_2^6=\frac{6!}{4!}=\frac{6 \cdot 5\cdot 4 \cdot 3\cdot 2 \cdot 1}{4\cdot 3 \cdot 2 \cdot 1} =6 \cdot 5=30
         $$
-            P_{r}^{n} =n(n-1)(n-2)(n-3)\,\cdots\,(n-r+1)=\frac{n!}{(n-r)!}
-        $$
-    where
-        $$
-            n! = n(n - 1)(n - 2)(n - 3), \cdots, (2) (1)
-        $$
-    and
-        $$
-            0! = 1
-        $$
-\end{frame}
-%========================================================================================================================================
-\begin{frame}{Permutations}{Example}
-    Consider a bowl containing six balls with the letters $A$, $B$, $C$, $D$, $E$ , $F$ on the respective balls. Now consider an experiment where I draw one ball from the bowl and write down its letter and then draw a second ball and write down its letter. The outcome is than an ordered pair, i.e., $BA \neq AB$. The number of distinct ways of doing this is given by
-        $$
-            P_{2}^{6}=\frac{6!}{4!}=\frac{6\times 5\times 4 \times 3\times 2 \times 1}{4\times 3 \times 2 \times 1} =6 \times 5=30
-        $$
-    Number of ways to arrange 6 items if $r=6$
-\end{frame}
+Number of ways to arrange 6 items if $k=6$
 
 ## Combinations: Ordering Does Not Matter
-The number of unordered subsets of size {r} chosen (without replacement) from {n} available objects is:
-$${n \choose r} = C_{r}^{n} =\frac{P_{r}^{n}}{r!}=\frac{n!}{r!\,(n-r)!} $$
-What is $C_{6}^{6}$
+The number of unordered subsets of size $k$ chosen (without replacement) from $n$ available objects is:
+$${n \choose k} = C_k^n =\frac{P_{k}^{n}}{k!}=\frac{n!}{k! \cdot (n-k)!} $$
 
 ## Combinations: Example
-Consider a bowl containing six balls with the letters $A$, $B$, $C$, $D$, $E$, $F$ on the respective balls. Now consider an experiment where I draw two balls from the bowl and write down the letter on each of them, not paying any attention to the order in which I draw the balls so that $AB$ is the same as $BA$. The number of distinct ways of doing this is given by
-$$C_{2}^{6}=\frac{6!}{2!4!}=\frac{6\times 5\times 4\times 3\times 2\times 1}{2\times 1\times 4\times 3 \times 2 \times 1} =\frac{6 \times 5}{2} =15$$
+Consider a bowl containing six balls with the letters $A$, $B$, $C$, $D$, $E$, $F$ on the respective balls. Now consider an experiment where you draw two balls from the bowl and write down the letter on each of them, not paying any attention to the order in which you draw the balls so that $AB$ is the same as $BA$. The number of distinct ways of doing this is given by
+$$C_{2}^{6}=\frac{6!}{2! \cdot 4!}=\frac{6 \cdot 5\cdot 4\cdot 3\cdot 2\cdot 1}{2\cdot 1\cdot 4\cdot 3 \cdot 2 \cdot 1} =\frac{6 \cdot 5}{2} =15$$

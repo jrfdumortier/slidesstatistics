@@ -2,7 +2,11 @@
 title: "Summarizing Data"
 author: "Jerome Dumortier"
 date: "`r format(Sys.time(),'%d %B %Y')`"
-output: beamer_presentation
+output: 
+     beamer_presentation:
+          theme: "Hannover"
+classoption: "aspectratio=1610"
+linkcolor: MidnightBlue
 ---
 
 ## Lecture Overview
@@ -23,9 +27,10 @@ Graphical summaries
 - Empirical cumulative distribution functions
 - Boxplots
 
-Covariance and correlation coefficicent
+Covariance and correlation coefficient
 
-## Central Tendency: Arithmetic Mean and Weighted Mean
+# Measures of Central Tendency
+## Arithmetic and Weighted Mean
 Arithmetic mean:
 $$\bar{x} = \frac{1}{N} \sum_{i=1}^{N} x_i$$
 Weighted mean:
@@ -74,6 +79,7 @@ What are the mode and the median for the example data with the three different s
 summary(states)
 ```
 
+# Measures of Disperson
 ## Range, Variance, and Standard Deviation
 Range
 
@@ -98,7 +104,7 @@ Sample standard deviation
 $$s = \sqrt{\frac{1}{N-1} \sum^N_{i=1}(x_i-\bar{x})^2}$$
 
 ## Sample Variance
-```{r,echo=FALSE,warning=FALSE}
+```{r,echo=FALSE,warning=FALSE,fig.height=3,fig.width=5,fig.align="center"}
 library(ggplot2)
 pop       = rnorm(100000,mean=50,sd=20)
 n_nminus1 = matrix(0,1000,2)
@@ -114,7 +120,7 @@ out                 = sqrt(out[2:50,])
 out1                = data.frame(Sample=c(2:50),Estimate=out[,1],Method="Dividing by N")
 out2                = data.frame(Sample=c(2:50),Estimate=out[,2],Method="Dividing by N-1")
 out                 = rbind(out1,out2)
-ggplot(out,aes(x=Sample,y=Estimate,color=Method))+geom_line(aes(color=Method))+theme_bw()+
+ggplot(out,aes(x=Sample,y=Estimate,color=Method))+geom_line()+theme_bw()+
      ylim(0,25)+theme(legend.position="bottom")
 rm(n_nminus1,out,out1,out2,i,j,pop,temp)
 load("G:/My Drive/Teaching/Data Analysis for Public Affairs/GitHub/DataAnalysisPAData.RData")
@@ -144,27 +150,20 @@ stdevp(mh1$price)
 The coefficient of variation standardizes the standard deviation $\sigma$ by the mean, i.e., $CV=\sigma/\mu$. Because the magnitude of the standard deviation depends on the mean, it is sometimes necessary to calculate the coefficient of variation to make two or more standard deviations comparable. For example, suppose you are comparing residential home values in California and Indiana. You calculate the mean and standard deviation for California as \$2,000,000 and \$400,000, respectively. The mean and standard deviation for Indiana are \$125,000 and \$50,000, respectively. Calculating the coefficient of variation ($CV$) for both states leads to $CV_{CA} = 0.2$ and $CV_{IN} = 0.4$. Hence, there is much more variation in the home values for Indiana than there is in California.
 
 ## Skewness
-Skewed left (negative skewness): Long tail to the left
-```{r,results=FALSE}
-hist(skewness$beta82)
+```{r,results=FALSE,echo=FALSE,warning=FALSE,fig.height=3,fig.width=5,fig.align="center",message=FALSE}
+library(ggplot2)
+df        = data.frame(value=numeric(),skewness=character())
+temp      = data.frame(value=skewness$beta82,skewness="Skewed left (neg. skew.)")
+df        = rbind(df,temp)
+temp      = data.frame(value=skewness$beta28,skewness="Skewed right (pos. skew.)")
+df        = rbind(df,temp)
+temp      = data.frame(value=skewness$beta55,skewness="Symmetric")
+df        = rbind(df,temp)
+ggplot(df,aes(x=value))+geom_histogram(color="black", fill="darkblue")+facet_wrap(vars(skewness))+theme_bw()+theme(axis.title.x=element_blank())
 ```
 
-Skewed right (positive skewness): Long tail to the right
-```{r,results=FALSE}
-hist(skewness$beta28)
-```
-
-Symmetric
-```{r,results=FALSE}
-hist(skewness$beta55)
-```
-
-## Graphical Summaries: Empirical Distribution Function
-```{r,echo=FALSE}
-plot(ecdf(mh1$price),main="Empirical CDF of Meridian Hills Data")
-```
-
-## Empirical Distribution Function: Quantiles
+# Graphical Summaries
+## Empirical Cumulative Distribution Function (ECDF)
 Quantiles are the value that divide the ordered observations into $n$ subsets each containing the same percentage of observations. There are $n-1$ quantiles. 
 
 - Median divides the observation into two subsets each containing 50\% of the observations.
@@ -174,6 +173,13 @@ Specific quantiles:
 - Quartiles: 25\%
 - Quintiles: 20\%
 - Percentiles: 1\%
+
+## ECDF Meridian Hills
+```{r,echo=FALSE,fig.height=3,fig.width=5,fig.align="center"}
+library(ggplot2)
+ggplot(mh1,aes(price))+stat_ecdf(geom="step")+theme_bw()+ylab("F(Home Value)")+xlab("Home Value ($)")
+
+```
 
 ## Interquartile Range: Norway Murder Data
 ```{r}
@@ -205,6 +211,7 @@ Lower and upper bounds
 - Lower bound: $179,998-1.5 \cdot 270,002 = -225,005$. Thus, it is simply the minimum value of \$84,900.
 - Upper bound: $450,000+1.5 \cdot 270,002 = 855,003$. Note that R displays the last observation within that bound, i.e., \$849,900. Every observation above that value are outliers.
 
+# Covariance and Correlation Coefficient
 ## Covariance and Correlation
 Data in `mh2` also contains information about the square footage of the homes. The covariance (and later the correlation coefficient) measures joint variability and movement of two random variables. Two definitions of covariance:
 $$Cov(x,y) = \frac{1}{N} \sum^{N}_{i=1} (x_i-E(X))(y_i-E(Y))=E(X \cdot Y) - E(X)E(Y)$$
@@ -248,23 +255,24 @@ Properties
 Note that the correlation coefficient has no dimensions!
 
 ## Scatter Plot between Price and Square Footage
-```{r,echo=FALSE}
+```{r,echo=FALSE,fig.height=3,fig.width=5,fig.align="center"}
 ggplot(mh2,aes(x=sqft,y=price/1000))+geom_point()+theme_bw()+ylab("Price in thousand $")+
   xlab("Square Footage of Home")+ylim(0,2000)+xlim(0,11000)
 ```
 
 ## Simpson's Paradox: Baseball Example
-Definitions:
+Abbreviations and terms:
 
-- AB: At bats
-- H: Hits, hits allowed
+- AB (At bats), H (Hits, hits allowed), and batting average (BA=H/AB)
 
 [Derek Jeter](https://www.baseball-reference.com/players/j/jeterde01.shtml)
 
-- 1995: AB = 48, H = 12
-- 1996: AB = 582, H = 183
+- 1995: AB = 48, H = 12, BA=12/48=0.250
+- 1996: AB = 582, H = 183, BA=183/582=0.314
+- Both years: BA=195/630=**0.310**
 
 [David Justice](https://www.baseball-reference.com/players/j/justida01.shtml)
 
-- 1995: AB = 411, H = 104
-- 1996: AB = 140, H = 45
+- 1995: AB = 411, H = 104, BA=104/411=**0.253**
+- 1996: AB = 140, H = 45, BA=45/140=**0.321**
+- Both years: BA=149/551=0.270
