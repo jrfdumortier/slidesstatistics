@@ -1,0 +1,234 @@
+---
+title: "Introduction to Probability Distribution Fitting"
+author: "Jerome Dumortier"
+date: "`r format(Sys.time(),'%d %B %Y')`"
+output: 
+     beamer_presentation:
+          theme: "Hannover"
+classoption: "aspectratio=1610"
+linkcolor: MidnightBlue
+---
+
+```{r,echo=FALSE,warning=FALSE,results=FALSE,message=FALSE}
+load("G:/My Drive/Teaching/Data Analysis for Public Affairs/GitHub/DataAnalysisPAData.RData")
+library(fitdistrplus)
+library(gamlss)
+library(ggplot2)
+library(invgamma)
+library(MASS)
+```
+
+## Lecture Overview
+Distribution fitting
+
+- Finding the best-fitting theoretical probability distribution for the observed data
+
+Three approaches covered in this lecture:
+
+- [MASS](https://cran.r-project.org/web/packages/MASS/index.html): `fitdistr()` 
+- [fitdistrplus](https://cran.r-project.org/web/packages/fitdistrplus/index.html): `fitdist()` 
+- [gamlss](https://cran.r-project.org/web/packages/gamlss/index.html): `fitDist()` 
+
+Notes:
+
+- No need to specify distribution function for the last approach, i.e., `fitDist()`
+- Introduction and overview to a very broad field of research
+
+## Introduction
+Empirical work often requires understanding of the underlying distribution of data:
+
+- Distribution of corn yields in a particular county based on observations to calculate the probability of getting a yield below a certain threshold, e.g., for crop insurance purposes 
+- Wind speed distribution at a particular location for construction of a wind farm: Electricity production is not possible below and above a certain wind speed
+
+Estimation of one or more parameters characterizing a probability distribution function
+
+# Introductory Example 
+
+## Weibull: Random Data Generation
+Random generation of data (N=10000) following a Weibull distribution with two parameters:
+
+- Shape: $k=2$ 
+- Scale: $\lambda=1.5$
+
+```{r}
+weibulldata = rweibull(10000,2,1.5)
+```
+
+## Weibull: Histogram
+```{r,fig.height=3,fig.width=5,echo=FALSE}
+hist(weibulldata,main="Histogram of Weibull Data")
+```
+
+## Weibull: Distribution Fitting with `fitdistr`
+```{r}
+weibullpara    = fitdistr(weibulldata,densfun="weibull",
+                          lower=c(0,0))
+shape          = weibullpara$estimate[1]
+scale          = weibullpara$estimate[2]
+c(shape,scale)
+```
+
+## Weibull: Observed Data and Estimated Distribution
+```{r,fig.height=2.5,fig.width=4,fig.align='center'}
+hist(weibulldata,freq=FALSE,ylim=c(0,0.6),xlim=c(0,6))
+range          = seq(0,6,0.1)
+lines(range,dweibull(range,shape,scale))
+```
+
+# Approach
+
+## Distribution Fitting Steps
+General steps (see [Fitting Distributions with R](https://cran.r-project.org/doc/contrib/Ricci-distributions-en.pdf) by Vito Ricci for more information)
+
+1. General hypothesis about candidate distributions, e.g., discrete vs. continuous, entire real number line vs. positive numbers only
+     - Histogram as a valuable first approach
+2. Parameter estimation
+     - Example: Calculating shape and scale parameters of the Weibull distribution or mean and variance for a Normal distribution 
+3. Goodness of fit
+
+Starting point for an overview of various probability distributions: [List of probability distributions](https://en.wikipedia.org/wiki/List_of_probability_distributions)
+
+# Candidate Distributions and Estimation
+
+## Meridian Hills: Possible Distributions
+Meridian Hills home values:
+
+- Source: \url{https://jrfdumortier.github.io/dataanalysis/}
+- 101 home values in the Meridian Hills neighborhood in Indianapolis
+- Scaling of data to measure home values in \$1000 
+
+Candidate distributions: 
+
+- Gamma distribution: Shape and scale parameter
+- Weibull distribution: Shape and scale parameter
+- Log-normal distribution, i.e, $Y=\ln(X)$ has a normal distribution: $\mu$ and $\sigma$
+
+```{r}
+mhprice        = mh1$price/1000
+mhgamma        = fitdistr(mhprice,"gamma")
+mhweibull      = fitdistr(mhprice,"weibull",lower=c(0,0))
+mhlognormal    = fitdistr(mhprice,"log-normal")
+```
+
+## Meridian Hills: Histogram I
+```{r,fig.keep='none'}
+hist(mhprice,freq=FALSE,ylim=c(0,0.0025),
+     xlim=c(0,2000),main="Meridian Hills")
+range          = seq(0,2000,1)
+lines(range,dgamma(range,mhgamma$estimate[1],
+                   mhgamma$estimate[2]),col="blue")
+lines(range,dweibull(range,mhweibull$estimate[1],
+                     mhweibull$estimate[2]),col="red")
+lines(range,dlnorm(range,mhlognormal$estimate[1],
+                   mhlognormal$estimate[2]),col="green")
+```
+
+## Meridian Hills: Histogram II
+```{r,echo=FALSE,fig.height=3,fig.width=5,fig.align='center'}
+hist(mhprice,freq=FALSE,ylim=c(0,0.0025),
+     xlim=c(0,2000),main="Meridian Hills")
+range          = seq(0,2000,1)
+lines(range,dgamma(range,mhgamma$estimate[1],
+                   mhgamma$estimate[2]),col="blue")
+lines(range,dweibull(range,mhweibull$estimate[1],
+                     mhweibull$estimate[2]),col="red")
+lines(range,dlnorm(range,mhlognormal$estimate[1],
+                   mhlognormal$estimate[2]),col="green")
+```
+
+# Goodness of Fit
+
+## Meridian Hills: Setup for `fitdist()`
+Use of the function `fitdist()` from the package [fitdistrplus](https://cran.r-project.org/web/packages/fitdistrplus/index.html)
+
+```{r,warning=FALSE}
+mhprice        = mh1$price/1000
+mhgamma        = fitdist(mhprice,"gamma",lower=c(0,0))
+mhweibull      = fitdist(mhprice,"weibull",lower=c(0,0))
+mhlognormal    = fitdist(mhprice,"lnorm",lower=c(0,0))
+```
+
+## Meridian Hills: Gamma Distribution
+```{r,echo=FALSE,fig.height=5.5,fig.align='center'}
+plot(mhgamma)
+```
+
+## Meridian Hills: Weibull Distribution
+```{r,echo=FALSE,fig.height=5.5,fig.align='center'}
+plot(mhweibull)
+```
+
+## Meridian Hills: Log-Normal Distribution
+```{r,echo=FALSE,fig.height=5.5,fig.align='center'}
+plot(mhlognormal)
+```
+
+## Ground Beef: Possible Distributions
+Second example using the function `fitdist()` package:
+
+- Use of the data `groundbeef` associated with the package `fitdistrplus`: Serving sizes collected in a French survey, for ground beef patties consumed by children under 5 years old.
+
+```{r}
+data("groundbeef")
+gbnormal       = fitdist(groundbeef$serving,"norm")
+gbweibull      = fitdist(groundbeef$serving,"weibull")
+gbgamma        = fitdist(groundbeef$serving,"gamma")
+gblognormal    = fitdist(groundbeef$serving,"lnorm")
+fitteddist     = list(gbnormal,gbweibull,gbgamma,gblognormal)
+plotlegend     = c("Normal","Weibull","Gamma","Lognormal")
+```
+
+## Ground Beef: Histogram
+```{r,echo=FALSE,fig.height=3,fig.width=5,fig.align='center'}
+hist(groundbeef$serving,main="Ground Beef",xlab="Data",xlim=c(0,200))
+```
+
+## Ground Beef:  Results I
+```{r,echo=FALSE,fig.height=3,fig.width=5,fig.align='center'}
+denscomp(fitteddist,legendtext=plotlegend)
+```
+
+## Ground Beef:  Results II
+```{r,echo=FALSE,fig.height=3,fig.width=5,fig.align='center'}
+cdfcomp(fitteddist,legendtext=plotlegend)
+```
+
+## Results: Q-Q Plot
+```{r,echo=FALSE,fig.height=3,fig.width=5,fig.align='center'}
+qqcomp(fitteddist,legendtext=plotlegend)
+```
+
+## Unspecified Distribution: `fitDist()`
+Use of the function `fitDist()` from package [gamlss](https://cran.r-project.org/web/packages/gamlss/index.html)
+
+```{r,warning=FALSE,message=FALSE,comment=FALSE,error=FALSE,results='hide'}
+output = fitDist(mhprice,type="realplus")
+```
+
+```{r}
+output$family
+output$Allpar
+```
+
+## Goodness of Fit with Inverse Gamma
+```{r,echo=FALSE,fig.height=5.5,fig.align='center'}
+plot(output,summaries=FALSE)
+```
+
+# Discrete Data Distribution Fitting
+
+## EV Data
+```{r,warning=FALSE,message=FALSE,comment=FALSE,error=FALSE,results='hide'}
+evpoisson = fitdist(evdata$numcars,discrete=TRUE,distr="pois")
+evnbinom  = fitdist(evdata$numcars,discrete=TRUE,distr="nbinom")
+```
+
+## EV Data: Results Poisson
+```{r,echo=FALSE,fig.height=3,fig.width=5,fig.align='center'}
+plot(evpoisson)
+```
+
+## EV Data: Results Negative Binomial
+```{r,echo=FALSE,fig.height=3,fig.width=5,fig.align='center'}
+plot(evnbinom)
+```
