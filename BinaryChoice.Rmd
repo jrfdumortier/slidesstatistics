@@ -1,0 +1,228 @@
+---
+title: "Violating Assumptions"
+author: "Jerome Dumortier"
+date: "`r format(Sys.time(),'%d %B %Y')`"
+output: 
+     beamer_presentation:
+          theme: "Hannover"
+classoption: "aspectratio=169"
+linkcolor: MidnightBlue
+---
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
+load("G:/My Drive/Teaching/Data Analysis for Public Affairs/GitHub/DataAnalysisPAData.RData")
+```
+
+## Overview
+
+## Required Packages and Files for this Lecture}
+    Packages:
+        
+            - \texttt{mfx}
+        
+    Files:
+        
+            - \texttt{organic.csv}
+            - \texttt{gss.csv}
+        
+## Dependent Variables
+Binary choice models ($y$ takes two values: 0 or 1)
+
+- Did you vote during the last election?
+- Does an individual recidivate after being released from prison?
+- Participation in the labor market
+- Purchasing a home
+- Model: $Pr(y=1|x)$
+
+## Numerical Methods
+Consider the following equation:
+$$y = x^2$$
+What are the values of $x$ and $y$ if $x=5$ or $y=81$? Next, consider
+$$y=x^2+\sqrt{x}$$
+What are the values of $x$ and $y$ if $x=9$ or $y=84$? %9
+
+## Linear Probability Model
+Most rudimentary model: Linear probability model (LPM)
+
+- Use the linear regression model $y_i=\beta_0+\beta_1 \cdot x_i + \epsilon$
+- Problem: $E(y_i|x_i) >1$ or $<0$ is possible.
+- It can be shown that disturbance terms are non-normal and heteroscedastic.
+
+Alternative: Model that calculates the probability of observing a 1.
+
+- Logit and probit models
+       
+## Logit and Probit Models}
+General assumption about some function $G(\cdot)$:
+$$P(y=1|x)=G(\beta_0+\beta_1 x_1 + \cdots \beta_k x_k)$$
+where
+\begin{gather*}
+  z=\beta_0+\beta_1 x_1 + \cdots \beta_k x_k \\
+  0 \leq G(z) \leq 1 \quad \vee \quad z
+\end{gather*}
+Models are estimated using Maximum Likelihood. Note that the interpretation of the coefficients will not be as straightforward as with the OLS model. Why?
+
+## Logit Model
+Remember the Bernoulli distribution from statistics:
+        \begin{align*}
+            Pr(Y=1) &= p \\
+            Pr(Y=0) &= 1-p
+        \end{align*}
+    with $E(y)=p$ and $Var(y)=p \cdot (1-p)$. For the logit model we have
+        $$
+            Pr(y=1) = G(z) = \frac{e^z}{1+e^z}=\frac{1}{1+e^{-z}}
+        $$
+    where $z=\beta_0+\beta_1 \cdot x$.
+
+## Probit Model
+Instead of using the cumulative logistic distribution, the probit model uses the cumulative normal distribution:
+$$G(z)=\Phi(z)$$
+Both models lead to similar results (not similar coefficients!).
+
+## Example using `organic`
+    Data description
+        
+            - $income$ of the respondent in \$ 1,000
+            - $buying$ of organic food: yes (1) or no (0)
+        
+    Results of interest for the binary choice model (for other models as well)
+        
+            - Coefficient estimates
+            - Marginal effects
+            - Predicted probabilities
+        
+\end{frame}
+%========================================================================================================================================
+\begin{frame}[fragile]{Binary Choice Models}{Estimation with R}
+Linear probability model
+\begin{verbatim}
+bhat = lm(buying~income,data=organic)
+summary(bhat)
+\end{verbatim}
+Coefficient estimates using the built-in R command:
+\begin{verbatim}
+bhat = glm(buying~income,family=binomial(link="logit"),
+    data=organic)
+summary(bhat)
+\end{verbatim}
+Coefficient estimates using the package \emph{mfx}:
+\begin{verbatim}
+bhat = logitmfx(buying~income,data=organic)
+summary(bhat$fit)
+\end{verbatim}
+\end{frame}
+%========================================================================================================================================
+\begin{frame}[fragile]{Binary Choice Models}{Marginal Effects using \texttt{mfx} package}
+Advantage of \emph{mfx} package: Estimation of marginal effects
+\begin{verbatim}
+bhat$mfxest
+            dF/dx   Std. Err.        z        P>|z|
+income 0.02919553 0.005634262 5.181785 2.197728e-07
+\end{verbatim}
+Important note:
+    
+        - Marginal effects are estimated at the mean of the independent variable(s)!
+    
+\end{frame}
+%========================================================================================================================================
+\begin{frame}[fragile]{Binary Choice Models}{Predicted Probabilities}
+    Example
+        
+            - What are the predicted probabilities of a person purchasing organic given their annual income (in \$ 1,000) of 25, 50, and 75?
+        
+    Solution in R:
+\begin{verbatim}
+datablock = data.frame(income=c(25,50,75))
+test = predict(bhat_logit,newdata=datablock,type="response")
+\end{verbatim}
+\end{frame}
+%========================================================================================================================================
+## Binary Choice Models}{Comparison: LPM versus Logit Model}
+    \begin{figure}
+        \begin{center}
+            \includegraphics[width=8in]{BCM_comparison}
+        \end{center}
+    \end{figure}
+\end{frame}
+%========================================================================================================================================
+\begin{frame}[fragile]{Logit Model}{\emph{organic.csv} Data}
+\small \begin{verbatim}
+Call:
+glm(formula = buying ~ income, family = binomial(link = "logit"),
+    data = organic)
+
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)
+(Intercept) -5.87557    1.13842  -5.161 2.45e-07 ***
+income       0.11709    0.02247   5.211 1.87e-07 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 138.469  on 99  degrees of freedom
+Residual deviance:  70.931  on 98  degrees of freedom
+AIC: 74.931
+\end{verbatim}
+\end{frame}
+%========================================================================================================================================
+\begin{frame}[fragile]{Probit Model}{\emph{organic.csv} Data}
+\small \begin{verbatim}
+Call:
+glm(formula = buying ~ income, family = binomial(link = "probit"),
+    data = organic)
+
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)
+(Intercept) -3.48128    0.60608  -5.744 9.25e-09 ***
+income       0.06956    0.01190   5.847 4.99e-09 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 138.469  on 99  degrees of freedom
+Residual deviance:  69.759  on 98  degrees of freedom
+AIC: 73.759
+\end{verbatim}
+\end{frame}
+%========================================================================================================================================
+## Binary Choice Models}{Example using \texttt{gss.csv}}
+    Data description:
+        
+            - General Social Survey (GSS) Data from 2018
+            - $fulltime$: Does the respondent work full time.
+            - $government$: Does the respondent work for the government
+            - $education$: Less than high school (0), high school (1), associate/junior college (2), bachelor (3), and graduate (4)
+            - $vote$: Voted in the 2016 election
+            - $married$, $age$, $childs$, and $income$ are self-explanatory. Income is for 2016.
+        
+\end{frame}
+%========================================================================================================================================
+\begin{frame}[fragile]{Binary Choice Models}{Estimation of the Logit Model in R}
+\small \begin{verbatim}
+Call:
+glm(formula = formula, family = binomial(link = "logit"), data = data,
+    start = start, control = control, x = T)
+
+Coefficients:
+             Estimate Std. Error z value Pr(>|z|)
+(Intercept)  1.844377   0.265836   6.938 3.98e-12 ***
+age         -0.018985   0.005436  -3.493 0.000478 ***
+childs       0.003805   0.051542   0.074 0.941154
+government   0.579630   0.225576   2.570 0.010183 *
+education    0.195072   0.066279   2.943 0.003248 **
+married      0.196830   0.156318   1.259 0.207971
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+\end{verbatim}
+\end{frame}
+%========================================================================================================================================
+## Binary Choice Models}{Practice Exercise: \texttt{gss.csv}}
+    Estimate a linear probability, logit, and probit model using \texttt{vote} as the dependent variable and the following independent variables
+        
+            - \texttt{government}, \texttt{married}, \texttt{education}, \texttt{age}, \texttt{childs}, and \texttt{income}
+        
+    Interpret the coefficients, calculate the marginal effects, and calculate the predicted probabilities for each observation. Would you incorporate age squared in this equation?
+\end{frame}
+%======================================================

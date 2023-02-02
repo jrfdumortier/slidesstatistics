@@ -1,0 +1,564 @@
+---
+title: "Panel Data"
+author: "Jerome Dumortier"
+date: "`r format(Sys.time(),'%d %B %Y')`"
+output: 
+     beamer_presentation:
+          theme: "Hannover"
+classoption: "aspectratio=169"
+linkcolor: MidnightBlue
+---
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
+load("G:/My Drive/Teaching/Data Analysis for Public Affairs/GitHub/DataAnalysisPAData.RData")
+library(stargazer)
+```
+
+## Overview
+
+Required R Packages
+
+- [plm](https://cran.r-project.org/web/packages/plm/index.html)
+- [lmtest](https://cran.r-project.org/web/packages/lmtest/index.html)
+
+    Documentation:
+        
+            - \url{https://cran.r-project.org/web/packages/plm/vignettes/plm.pdf}
+        
+## Note regarding Notation
+Use of the package [stargazer](https://cran.r-project.org/web/packages/stargazer/index.html) due to the large number of variables. Slight change in notation:
+
+
+##Introduction I} %For the NLSY79: Accessing data, investigator, continue as guest, pick income
+    Pooled data: Combination of multiple cross-sectional data over time
+        
+            - Two or more different observational units over time
+            - Grades in an economics class based on students' concentration combined from multiple semesters
+            - American Community Survey (ACS): \url{http://www.census.gov/acs/www/}
+        
+    Panel data: Repeated measurement on the same individuals $i$ over time $t$.
+        
+            - Individual units can be people, states, firms, counties, countries, etc.
+            - National Longitudinal Survey (NLSY79): \url{https://www.nlsinfo.org/content/getting-started}
+            - Necessary adjustments of standard error due to correlation across time.
+        
+## Introduction II
+Some assumptions about linear panel models:
+        
+- Regular time intervals
+- Errors are correlated
+- Parameters may vary across individuals or time
+- Intercept: Individual specific effects model (fixed or random)
+        
+Note that the General Social Survey (GSS) is not a panel data set because different respondents are questioned every year.
+
+## Examples and Advantages
+Panel Study of Income Dynamics (PSID)
+
+- Data on approximately 5,000 families on various socioeconomic and demographic variables
+
+Survey of Income and Program Participation (SIPP)
+
+- Interviews about economic condition of respondents
+
+Advantages
+
+- Takes into account heterogeneity among observational units, e.g., firms, states, counties, etc.
+- Better understanding on the dynamics of change for observational units over time.
+- Combines cross-sectional data with time series data leading to more complete behavioral models
+        
+## Terminology and Types
+Balanced versus unbalance panel:
+
+- A balanced panel has the same number of time-series observations for each subject or observational unit, whereas an unbalanced panel does not.
+        
+Short versus long panel:
+        
+- A short panel has a larger number of subjects or observational units than there are time periods. A long panel has a greater number of time periods than observational units.
+        
+Types of regression models:
+        
+- Pooled Ordinary Least Square model
+- Fixed effects model
+- Random effects model
+
+# Simple Panel Data Methods
+## Data `fertil1`: Variables
+Data from the General Social Survey for the years 1974 to 1984
+        
+- $year$: 72 to 84, even
+- $educ$:  years of schooling
+- $meduc$ and $feduc$: mother's and father's education
+- $kids$: number children ever born
+- $east$, $northcentral$, and $west$: 1 if lived in at 16
+- $far$m: 1 if on farm at 16
+- $otherrural$: 1 if other rural at 16
+- $town$: 1 if lived in town at 16
+- $smallcity$: 1 if in small city at 16
+        
+Source: Jeffrey Wooldridge, Introductory Econometrics: A Modern Approach
+
+##  Data Methods (`fertil1`)
+```{r,echo=FALSE}
+summary(lm(kids~educ+age+I(age^2)+east+northcentral+west+farm+otherrural
+    +town+smallcity+y74+y76+y78+y80+y82+y84,data=fertil1))
+```
+
+\scriptsize \begin{verbatim}
+lm(kids~educ+age+I(age^2)+east+northcentral+west+farm+otherrural
+    +town+smallcity+y74+y76+y78+y80+y82+y84)
+
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept) -6.785069   3.098715  -2.190 0.028758 *
+educ        -0.129765   0.018653  -6.957 5.94e-12 ***
+age          0.499186   0.140592   3.551 0.000400 ***
+I(age^2)    -0.005436   0.001589  -3.421 0.000648 ***
+east         0.060729   0.132538   0.458 0.646896
+northcentral 0.219568   0.120638   1.820 0.069019 .
+west         0.050807   0.167982   0.302 0.762360
+[...] (Not statistically significant)
+y82         -0.414209   0.174412  -2.375 0.017723 *
+y84         -0.565326   0.177398  -3.187 0.001479 **
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 1.581 on 1112 degrees of freedom
+Multiple R-squared:  0.09941,	Adjusted R-squared:  0.08645
+F-statistic: 7.671 on 16 and 1112 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+## Interpretation
+Evolution of fertility rates over time after controlling of other observable factors:
+        
+- Base year: 1972
+- Negative coefficients indicate a drop in fertility in the early 1980's
+- Coefficient of \emph{y82} (-0.41) indicates that women had on average 0.41 less children, i.e., 100 women had 41 kids less than 1972
+- This drop is independent from education since we are controlling for education.
+- More educated women have fewer children
+- Assumes that the effect of each explanatory variable remains constant.
+        
+## Example using `cps7885`
+Interact year dummy with key explanatory variables to see if the effect of that variable has changed over time:
+$$\ln(wage)=\beta_0 + \gamma_0 \cdot y85 + \beta_1 \cdot educ + \gamma_1 \cdot y85 \cdot educ + \beta_2 \cdot exper\\ + \beta_3 \cdot exper^2 + \beta_4 \cdot union +\beta_5 \cdot female + \gamma_5 \cdot y85 \cdot female$$
+Interpretation:
+        
+- $\beta_0$ is the 1978 intercept
+- $\beta_0+\gamma_0$ is the 1985 intercept
+- $\beta_1$ is the return to education in 1978
+- $\beta_1 + \gamma_1$ is the return to education in 1985
+- $\gamma_1$ measures how the return to education has changed over the seven year period
+        
+## Results for \texttt{cps7885}
+```{r}
+bhat=lm(log(wage) ~ y85 + educ + y85 * educ + exper + expersq +
+    union + female + y85fem, data = cps7885)
+```
+
+\scriptsize \begin{verbatim}
+
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)
+(Intercept)  4.589e-01  9.345e-02   4.911 1.05e-06 ***
+y85          1.178e-01  1.238e-01   0.952   0.3415
+educ         7.472e-02  6.676e-03  11.192  < 2e-16 ***
+exper        2.958e-02  3.567e-03   8.293 3.27e-16 ***
+expersq     -3.994e-04  7.754e-05  -5.151 3.08e-07 ***
+union        2.021e-01  3.029e-02   6.672 4.03e-11 ***
+female      -3.167e-01  3.662e-02  -8.648  < 2e-16 ***
+y85fem       8.505e-02  5.131e-02   1.658   0.0977 .
+y85:educ     1.846e-02  9.354e-03   1.974   0.0487 *
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.4127 on 1075 degrees of freedom
+Multiple R-squared:  0.4262,	Adjusted R-squared:  0.4219
+F-statistic:  99.8 on 8 and 1075 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+%========================================================================================================================================
+##Simple Panel Data Methods}{Example using \texttt{cps7885}}
+    Interpretation
+        
+            - 1978 return to education: 7.47\%
+            - 1985 return to education: 7.47\%+1.85\% = 9.32\%
+            - 1978 gender gap: 31.67\%
+            - 1985 gender gap: 31.67\% - 8.51\% = 23.16\%
+        
+## Data `kiel`: Setup
+Data set about home values near the location of an garbage incinerator
+
+- Run 1981 data
+- Run 1978 data
+
+Difference-in-difference estimator: -\$30,688-(-\$18,824)=-\$11,864
+$$ \hat{\delta}_1 = (price_{81,near}-price_{81,far})-(price_{78,near}-price_{78,far})$$
+where $\hat{\delta}_1$ represents the difference over time in average differences in housing prices in the two locations.
+
+%========================================================================================================================================
+##Simple Panel Data Methods}{Example using \texttt{kiel}}
+    To determine statistical significance:
+        \begin{equation*}
+            price = \beta_0 + \gamma_0 \cdot y81 + \beta_1 \cdot nearinc + \gamma_1 \cdot y81 \cdot nearinc
+        \end{equation*}
+    Interpretation
+        
+            - $\beta_0$: Average home value which is not near the garbage incinerator
+            - $\gamma_0 \cdot y81$: Average change in housing values for all homes
+            - $\beta_1 \cdot nearinc$: Location effect that is not due to the incinerator
+            - $\gamma_1$: Decline in housing values due to incinerator
+        
+    Homes have lost 9.3\% in values when including additional independent variables and using the natural logarithm of price.
+
+%========================================================================================================================================
+%##Two Period Panel Analysis}{Same Observational Unit for $t=1,2$ using \texttt{crime}}
+%    Crime data on 92 cities for 1982 and 1987
+%        
+%            - Run \texttt{lm(crmrte~unem,data=crime87)}
+%            - Unemployment lowers crime. Can this be correct?
+%        
+%    Unobserved factors affecting dependent variable:
+%        \begin{enumerate}
+%            - Constant over time
+%            - Varying over time
+%        \end{enumerate}
+%
+%========================================================================================================================================
+%##Two Period Panel Analysis}{Same Observational Unit for $t=1,2$ using \texttt{crime}}
+%    First regression suffers from omitted variable bias, i.e., views the unobserved factors as (1) constant and (2) varying over time
+%        \begin{equation*}
+%            y_{it} = \beta_0+ \gamma_0 \cdot d_t+\beta_1 \cdot x_{it} + a_i +\epsilon_{it}
+%        \end{equation*}
+%    where
+%        
+%            - $\beta_0$: $t=1$ intercept ($t=2$: $\beta_0+\gamma_0$)
+%            - $d_t$: Dummy variable for time periods (equal to 1 for time period 2)
+%            - $a_i$: unobserved time constant effect (fixed effect over time)
+%        
+%    This is an unobserved effects model.
+%
+%========================================================================================================================================
+%##Unobserved Effects Model for Crime}
+%        \begin{equation*}
+%            crate = \beta_0 + \gamma_0 \cdot d87 + \beta_1 \cdot unemployment + a_i + \epsilon_{it}
+%        \end{equation*}
+%    where $a_i + \epsilon_{it}$ is a composite error. The composite error is a problem because it may be correlated with the independent variables. Solution:
+%        \begin{align*}
+%            y_{i2} & = (\beta_0+\gamma_0)+\beta_1 \cdot x_{i2} + a_i + \epsilon_{i2}\\
+%            y_{i1} & = \beta_0+\beta_1 \cdot x_{i1} + a_i + \epsilon_{i1}
+%        \end{align*}
+%    Taking the difference between the two equations:
+%        \begin{equation*}
+%            y_{i2}-y_{i1} = \gamma_0+\beta_1 \cdot (x_{i2}-x_{i1}) + (\epsilon_{i2} - \epsilon_{i1})
+%        \end{equation*}
+%    This can be written as
+%        \begin{equation*}
+%            \Delta y = \gamma_0 + \beta_1 \cdot \Delta x + \Delta \epsilon
+%        \end{equation*}
+%    The last equation satisfies all the assumption of the classical model.
+%
+%========================================================================================================================================
+##Grunfeld Data}
+    The data set is used in many textbooks and comes with the package \texttt{plm}.
+        
+            - After loading the package, type \texttt{data(``Grunfeld'')}
+        
+    Data on 10 companies over the period 1935 to 1954:
+        
+            - \emph{inv}: Investment
+            - \emph{value}: Value of the firm
+            - \emph{capital}: Capital stock
+        
+    Companies of interest for this class: GM (firm 1), U.S. Steel (firm 2), GE (firm 3), Westinghouse (firm 8)
+
+%========================================================================================================================================
+##Pooled OLS Model}
+    Pooling all cross-sectional and time series observations into a single data set and running an OLS regression.
+        \begin{equation*}
+            inv_i = \beta_0 + \beta_1 \cdot value_i + \beta_2 \cdot capital_i
+        \end{equation*}
+    General formulation of the pooled model
+        \begin{equation*}
+            y_{it}=\beta_0+\beta_1 \cdot x_i + \epsilon_i
+        \end{equation*}
+    Issues with pooled OLS model:
+        
+            - Ignores heterogeneity among the observations and time.
+            - If heterogeneity is present\\
+             $\Rightarrow$ Correlation between independent variables and error term leading to biased and inconsistent coefficient estimates. Fix: Fixed effects model takes heterogeneity into account.\\
+             $\Rightarrow$ Autocorrelation between error terms. Fix: Random effects model
+        
+
+%========================================================================================================================================
+\begin{frame}[fragile]{Data Preparation and Pooled OLS Model}
+    We are only interested in firm 1, 2, 3, and 8:
+        
+            - \small \verb"grunfeld = subset(Grunfeld,Grunfeld$firm %in% c(1,2,3,8))"
+        
+    To use the functions from \texttt{plm}, define data as a panel data set:
+        
+            - \small \verb+grunfeld = pdata.frame(grunfeld,index=c("firm","year"))+
+        
+    Running a simple OLS model on the data:
+        
+            - Using the regular \texttt{lm} function
+            - Using the \texttt{plm} function and specifying the model as \texttt{``pooling''}
+            - Name the outputs \texttt{``grunwald.ols''} and \texttt{``grunwald.pooling''}
+        
+
+%========================================================================================================================================
+\begin{frame}[fragile]{Pooled OLS Model}
+\scriptsize \begin{verbatim}
+Call:
+lm(formula = inv ~ value + capital, data = grunfeld)
+
+Residuals:
+    Min      1Q  Median      3Q     Max
+-319.68  -99.95    1.96   65.99  336.21
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept) -62.83184   29.72538  -2.114   0.0378 *
+value         0.11052    0.01378   8.023 9.19e-12 ***
+capital       0.30046    0.04940   6.082 4.27e-08 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 142.9 on 77 degrees of freedom
+Multiple R-squared:  0.7547,	Adjusted R-squared:  0.7483
+F-statistic: 118.4 on 2 and 77 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+# Fixed Effects Model
+## Theoretical Concepts I
+Fixed effects model or Least-Squares Dummy Variable (LSDV) regression
+        
+            - Constant slope coefficients but varying intercept over $i$
+        
+    Regression equation:
+        \begin{gather*}
+            inv_{it} = \beta_{0i} + \beta_1 \cdot value_{it} + \beta_2 \cdot capital_{it}\\
+            i=1,2,3,4\\
+            t=1,2, \dots 20
+        \end{gather*}
+    This model can also be written as
+        \begin{equation*}
+            inv_{it} = \alpha_0+\alpha_1 \cdot D_{1i} + \alpha_2 \cdot D_{2i} +\alpha_3 \cdot D_{3i} + \beta_1 \cdot value_{it} + \beta_2 \cdot capital_{it}
+        \end{equation*}
+    Individual specific effects:
+        \begin{equation*}
+            y_{it} = \alpha_i + \beta_i \cdot x_{it} + \epsilon_{it}
+        \end{equation*}
+    $\alpha_i$ can be fixed or random
+
+%========================================================================================================================================
+##Fixed Effects Model}{Theoretical Concepts II}
+    Fixed effects model
+        
+            - Intercept $\beta_{0i}$ is firm specific.
+            - For an individual, this could be education and/or ability, possibly correlated with independent variables
+            - Intercept is time-invariant.
+            - Slope coefficients do not vary across individuals (firms) or time
+        
+    Implementation in R
+        
+            - Using the \texttt{plm} function and specifying the model as \texttt{``within''}
+            - Name the output \texttt{``grunwald.fixed''}
+        
+
+%========================================================================================================================================
+\begin{frame}[fragile]{Fixed Effects Model}{Implementation in R using \texttt{plm}}
+\scriptsize \begin{verbatim}
+Call:
+plm(formula = inv ~ value + capital, data = grunfeld, model = "within")
+
+Balanced Panel: n=4, T=20, N=80
+
+Coefficients :
+        Estimate Std. Error t-value Pr(>|t|)
+value   0.108400   0.017566  6.1711  3.3e-08 ***
+capital 0.345058   0.026708 12.9195  < 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Total Sum of Squares:    2171500
+Residual Sum of Squares: 422220
+R-Squared:      0.80556
+Adj. R-Squared: 0.79242
+F-statistic: 153.291 on 2 and 74 DF, p-value: < 2.22e-16
+\end{verbatim}
+
+%========================================================================================================================================
+\begin{frame}[fragile]{Fixed Effects Model}{Firm-Specific Intercepts and Hypothesis Test}
+In order to get the firm specific intercepts:
+\begin{verbatim}
+fixef(grunfeld.fixed)
+         1          2          3          8
+ -85.51533   94.98762 -246.22751  -59.38573
+\end{verbatim}
+
+Testing whether a fixed effects or OLS is appropriate (H$_0$: OLS better):
+\begin{verbatim}
+pFtest(grunfeld.fixed,grunfeld.ols)
+
+	F test for individual effects
+
+data:  inv ~ value + capital
+F = 67.215, df1 = 3, df2 = 74, p-value < 2.2e-16
+alternative hypothesis: significant effects
+\end{verbatim}
+
+If the p-value is below 0.05 then the fixed effects model is a better choice.
+
+%========================================================================================================================================
+\begin{frame}[fragile]{Fixed Effects Model}{Implementation in R using \texttt{lm}}
+\scriptsize \begin{verbatim}
+Call:
+lm(formula = inv ~ value + capital + factor(firm), data = grunfeld)
+
+Coefficients:
+                Estimate Std. Error t value Pr(>|t|)
+(Intercept)    -85.51533   73.48978  -1.164 0.248310
+value            0.10840    0.01757   6.171  3.3e-08 ***
+capital          0.34506    0.02671  12.919  < 2e-16 ***
+factor(firm)2  180.50295   45.71679   3.948 0.000178 ***
+factor(firm)3 -160.71218   46.62236  -3.447 0.000938 ***
+factor(firm)8   26.12959   64.94348   0.402 0.688591
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 75.54 on 74 degrees of freedom
+Multiple R-squared:  0.9341,	Adjusted R-squared:  0.9297
+F-statistic: 209.9 on 5 and 74 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+%========================================================================================================================================
+##Random Effects Model}{Theoretical Concepts}
+    The general fixed effects model can be expressed as
+        \begin{equation*}
+            y_{it} = \beta_{0i} + \beta_1 \cdot x_{1,it} + \beta_2 \cdot x_{2,it} + \epsilon_{it}
+        \end{equation*}
+    Instead of treating $\beta_{0i}$ as fixed, the random model assumes
+        \begin{equation*}
+            \beta_{0i} = \beta_0 + \upsilon_i
+        \end{equation*}
+    where $\upsilon_i$ is random error term with a mean of zero and variance $\sigma_{\upsilon}^2$. According to Gujarati ``What we are essentially saying is that the four firms included in our sample are a drawing from a much larger universe of such companies and that they have a common mean value for the intercept $\beta_0$ and the individual differences in the intercept values of each company are reflected in the error term $\upsilon_i$.''
+
+%========================================================================================================================================
+\begin{frame}[fragile]{Random Effects Model}
+\scriptsize \begin{verbatim}
+Call: plm(formula = inv ~ value + capital, data = grunfeld, model = "random")
+
+Effects:
+                   var  std.dev share
+idiosyncratic  5705.63    75.54 0.212
+individual    21217.03   145.66 0.788
+theta:  0.8848
+
+Coefficients :
+              Estimate Std. Error t-value  Pr(>|t|)
+(Intercept) -73.084676  81.172222 -0.9004    0.3707
+value         0.108056   0.016840  6.4165 1.034e-08 ***
+capital       0.344543   0.026629 12.9384 < 2.2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Total Sum of Squares:    2227700
+Residual Sum of Squares: 437750
+R-Squared:      0.8035
+Adj. R-Squared: 0.79839
+F-statistic: 157.425 on 2 and 77 DF, p-value: < 2.22e-16
+\end{verbatim}
+
+%========================================================================================================================================
+\begin{frame}[fragile]{Breusch-Pagan Lagrange Multiplier (LM) Test}
+For random effects models: Null hypothesis of no panel effect, i.e., OLS is better. If p-value is below 0.05, we reject the null hypothesis and thus, a random effects model is more appropriate than the OLS.
+
+\small \begin{verbatim}
+plmtest(grunfeld.pooling,type=c("bp"))
+
+	Lagrange Multiplier Test - (Breusch-Pagan) for balanced panels
+
+data:  inv ~ value + capital
+chisq = 378.44, df = 1, p-value < 2.2e-16
+alternative hypothesis: significant effects
+\end{verbatim}
+
+%========================================================================================================================================
+\begin{frame}[fragile]{Hausman Test: Fixed or Random Model}
+The Hausman Test tests the null hypothesis that the preferred model is a random effects model. It basically tests whether the unique errors are correlated with the regressors.
+
+\begin{verbatim}
+phtest(grunfeld.random,grunfeld.fixed)
+
+	Hausman Test
+
+data:  inv ~ value + capital
+chisq = 0.14882, df = 2, p-value = 0.9283
+alternative hypothesis: one model is inconsistent
+\end{verbatim}
+If p-value is below 0.05 then use fixed effects.
+
+%========================================================================================================================================
+%\begin{frame}[fragile]{Testing for Heteroscedasticity}
+%\begin{verbatim}
+%bptest(inv~value+capital+factor(firm),data=grunfeld)
+%
+%	studentized Breusch-Pagan test
+%
+%data:  inv ~ value + capital + factor(firm)
+%BP = 25.375, df = 5, p-value = 0.0001179
+%\end{verbatim}
+%If the p-value is below 0.05, then we face heteroscedasticity.
+%
+%========================================================================================================================================
+%\begin{frame}[fragile]{Heteroscedasticity Consistent Coefficients and Standard Errors}
+%\scriptsize \begin{verbatim}
+%coeftest(grunfeld.fixed,vcovHC)
+%
+%t test of coefficients:
+%
+%        Estimate Std. Error t value  Pr(>|t|)
+%value   0.108400   0.014293  7.5839 7.902e-11 ***
+%capital 0.345058   0.031152 11.0765 < 2.2e-16 ***
+%---
+%Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+%
+%coeftest(grunfeld.random,vcovHC)
+%
+%t test of coefficients:
+%
+%              Estimate Std. Error t value  Pr(>|t|)
+%(Intercept) -73.084676  47.566742 -1.5365    0.1285
+%value         0.108056   0.012149  8.8945 1.915e-13 ***
+%capital       0.344543   0.032276 10.6750 < 2.2e-16 ***
+%---
+%Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+%\end{verbatim}
+%
+
+
+
+
+
+
+
+
+\end{document}
+
+##Implementation in R}
+
+    Data set: \emph{psid.csv} (Panel Study on Income Dynamics)
+        
+            - exp
+            - wks
+            - occ
+            - ind
+            - south
+            - smsa
+            - ms
+            - fem
+        
+
+
+

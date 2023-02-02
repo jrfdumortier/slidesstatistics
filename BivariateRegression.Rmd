@@ -2,8 +2,16 @@
 title: "Bivariate Regression"
 author: "Jerome Dumortier"
 date: "`r format(Sys.time(),'%d %B %Y')`"
-output: beamer_presentation
+output: 
+     beamer_presentation:
+          theme: "Hannover"
+classoption: "aspectratio=169"
+linkcolor: MidnightBlue
 ---
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
+load("G:/My Drive/Teaching/Data Analysis for Public Affairs/GitHub/DataAnalysisPAData.RData")
+```
 
 ## Introduction
 General goal of a regression analysis:
@@ -57,7 +65,7 @@ Equations necessary to solve the bivariate regression model:
     $$\hat{\beta_0} = \bar{y}-\beta_1 \cdot \bar{x}$$
 
 ## Example: Home Values and Square Footage
-```{r,echo=FALSE}
+```{r,echo=FALSE,fig.width=10,fig.height=5}
 nobs           = 75
 sqft           = runif(n=nobs,min=1000,max=2000)
 price          = (50000+100*sqft+rnorm(n=nobs,mean=0,sd=40000))/1000
@@ -116,7 +124,7 @@ Despite the fact that the regression model is linear, non-linear relationships c
 - Relationship between income and education can exhibit a non-linear form because a change in income due to more education may decrease with more education.
 
 ## Example of Linear Regression Models
-```{r,echo=FALSE}
+```{r,echo=FALSE,fig.width=10,fig.height=5}
 fun1 = function(x){exp(b[1]+b[2]*log(x))}
 fun2 = function(x){b[1]+b[2]*x+b[3]*x^2+b[4]*x^3}
 par(mfrow=c(1,2))
@@ -161,7 +169,7 @@ Consequences:
 - Inflated standard errors
 
 ## A3: Homoscedasticity vs. Heteroscedasticity
-```{r,echo=FALSE}
+```{r,echo=FALSE,fig.width=10,fig.height=5}
 nobs           = 250
 x              = sort(runif(nobs,1500,3000))
 y_true         = 50000+70*x
@@ -248,7 +256,7 @@ The hypothesis test is never conducted manually and every statistical software c
 |          47 |          16 |    2209 |     17.52 | -1.52 |    2.32 |                25 |
 |          50 |          18 |    2500 |     16.58 |  1.42 |    2.03 |                 9 |
 
-Note that $\sum e_i^2=10.89$, $\sum x_i^2=10.89$ $\sum (y_i-\bar{y})^2 = 88$
+Note that $\sum e_i^2=10.89$, $\sum x_i^2=10.89$, and $\sum (y_i-\bar{y})^2 = 88$
 
 ## Numerical Example: $R^2$ and Standard Errors
 Goodness of fit $R^2$:
@@ -265,7 +273,7 @@ The manual calculations match the output from R.
 load("G:/My Drive/Teaching/Data Analysis for Public Affairs/GitHub/DataAnalysisPAData.RData")
 ```
 
-\footnotesize
+\scriptsize
 ```{r}
 bhat = lm(price~miles,data=honda)
 summary(bhat)

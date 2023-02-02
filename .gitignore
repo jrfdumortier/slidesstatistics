@@ -2,3 +2,10 @@
 .Rhistory
 .RData
 .Ruserdata
+IntroductionR.Rmd
+IntroductionStatistics.Rmd
+Probability.Rmd
+ProbabilityDistributions.Rmd
+SummarizingData.Rmd
+IntroductionRegression.Rmd
+ViolatingAssumptions.Rmd

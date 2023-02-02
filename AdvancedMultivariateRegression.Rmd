@@ -1,0 +1,727 @@
+---
+title: "Multivariate Regression"
+author: "Jerome Dumortier"
+date: "`r format(Sys.time(),'%d %B %Y')`"
+output: 
+     beamer_presentation:
+          theme: "Hannover"
+classoption: "aspectratio=169"
+linkcolor: MidnightBlue
+---
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
+load("G:/My Drive/Teaching/Data Analysis for Public Affairs/GitHub/DataAnalysisPAData.RData")
+```
+
+## Lecture Overview
+Extension of the bivariate model to multivariate regression
+        
+- One dependent variable but multiple independent variables
+        
+Topics associated with multivariate regression models covered in this lecture:
+        
+- Dummy Variables
+- Natural logarithm
+- Functional forms
+- Interaction Terms
+        
+## Introduction
+Bivariate regression model (one independent and one dependent variable)
+$$y = \beta_0 + \beta_1 \cdot x_1 + \epsilon$$
+Multivariate linear regression model (multiple independent variables)
+$$y = \beta_0 + \beta_1 \cdot x_1 + \beta_2 \cdot x_2 + \dots + \beta_k \cdot x_k + \epsilon$$
+Whether we consider the univariate or multivariate regression model, the objective is always to minimize the sum of squared errors, hence the name ordinary least square (OLS) model. The equation of a line can be determined using slope and intercept, we can write:
+$$E(y|x) = \beta_0 + \beta_1 x$$
+A model with two independent variables (predictors) describes a plane.
+
+## Assumptions
+Key assumptions of the model are identical to the bivariate model:
+
+- Zero mean of the error terms, i.e., $E(\epsilon | x_1, \dots, x_k) = 0$.
+- No auto-regression and no serial correlation, i.e., $Cov(\epsilon_i,\epsilon_j)=0 \quad \vee \quad i \neq j$
+- Homoscedasticity, $Var(\epsilon_i) = \sigma^2$
+- Linearity, i.e., the model can be expressed as a linear relationship between $y$ and $x_1, \dots, x_k$.
+
+With more than one independent variable, absence of perfect multicollinearity becomes important.
+        
+- For example, including wealth and income in a regression model may result in multicollinearity
+        
+        
+wdi$gdppercapita    = wdi$gdp/wdi$population
+wdiyear             = subset(wdi,year==2018,
+                             select=c("country","lifeexp","litrate","incomeLevel"))
+wdiyear             = na.omit(wdiyear)
+bhat = lm(lifeexp~litrate+factor(incomeLevel),data=wdiyear)
+summary(bhat)
+
+## Multivariate Regression Models
+Purpose:
+        
+- Measuring the effect of one independent variable on the dependent variable
+- Crucial issue: We have to control for everything else that could influence the dependent variable!
+        
+Example for why we have to control for everything:
+        
+- Weekly grocery bill as a function of years of education
+        
+Example: Crime rate depends on unemployment, population density, and high school dropout rate:
+$$y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3$$
+   where $x_1$ = population density, $x_2$ = unemployment, and $x_3$ = high school dropout rate
+
+North Carolina County Data}
+\footnotesize \begin{verbatim}
+Call:
+lm(formula = violentcrimerate ~ popdense + unemployment + publicschoolenrollment,
+    data = crime)
+
+Residuals:
+     Min       1Q   Median       3Q      Max
+-0.31585 -0.06984 -0.00229  0.06183  0.87121
+
+Coefficients:
+                         Estimate Std. Error t value Pr(>|t|)
+(Intercept)            -1.927e-01  1.462e-01  -1.318    0.191
+popdense                5.609e-04  8.278e-05   6.776 1.03e-09 ***
+unemployment            3.660e-02  8.629e-03   4.242 5.15e-05 ***
+publicschoolenrollment  1.497e-02  9.193e-03   1.628    0.107
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.1701 on 95 degrees of freedom
+Multiple R-squared:  0.3777,	Adjusted R-squared:  0.358
+F-statistic: 19.22 on 3 and 95 DF,  p-value: 8.036e-10
+\end{verbatim}
+\end{frame}
+%========================================================================================================================================
+\begin{frame}{Child Mortality Data}{Setup}
+    
+        - We think that Child Mortality (CM), measured as the number of deaths per 1000 births, is related to the per capita Gross National Product (PGNP) and the Female Literacy rate (FLFP).
+        - We might hypothesize that wealthier countries have lower child mortality rates, and countries with higher female literacy rates also have lower child mortality rates.
+        - Why? Maybe higher PGNP means more money for healthcare; Maybe better literacy rates mean more educated mothers that can take advantage of health related information.
+        - The data set also contains the total fertility rate (TFR) between 1980 and 1985, i.e., the average number of children born to a woman.
+    
+\end{frame}
+%========================================================================================================================================
+\begin{frame}[fragile]{Child Mortality Data}{Results in R}
+\footnotesize
+\begin{verbatim}
+Call:
+lm(formula = CM ~ PGNP + FLFP, data = childmortality)
+
+Residuals:
+    Min      1Q  Median      3Q     Max
+-84.267 -24.363   0.709  19.455  96.803
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)
+(Intercept) 263.641586  11.593179  22.741  < 2e-16 ***
+PGNP         -0.005647   0.002003  -2.819  0.00649 **
+FLFP         -2.231586   0.209947 -10.629 1.64e-15 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 41.75 on 61 degrees of freedom
+Multiple R-squared:  0.7077,	Adjusted R-squared:  0.6981
+F-statistic: 73.83 on 2 and 61 DF,  p-value: < 2.2e-16
+\end{verbatim}
+\end{frame}
+%========================================================================================================================================
+\begin{frame}{Child Mortality Data}{Interpretation of the Data}
+    
+        - It tells us the parameter estimates for PGNP and FLR. It also tells us if our estimate is statistically different from zero.
+        - As expected, both variables lower child mortality.
+        - As per capita GNP increases by one dollar, child mortality decreases by 0.565 units, holding the effects of female literacy constant.
+        - Since the units of CM are number of deaths per 1000 births, it is easier to say that for a \$1000 dollar increase in per capita GNP, the number of childhood deaths decreases by 5.6 per 1000. (since 0.00565 * 1000 = 5.6 units)
+        - Similarly, for a one unit (one percent) increase in the female literacy rate, the childhood mortality decreases by 2.23 deaths per 1000, holding the effects of PGNP constant.
+    
+\end{frame}
+%========================================================================================================================================
+\begin{frame}{Child Mortality Data}{Interpretation of the Data and Purpose of OLS}
+    Forecasting
+        
+            - If a country as a per capita GNP of \$3,000 and a female literacy rate of 50, then the expected number of childhood deaths per 1000 births is 135.26.
+            - $\beta_1$ and $\beta_2$ as partial regression or partial slope coefficients:
+                
+                    - $\beta_1$ quantifies the change in the expected mean of $Y$, i.e., $E(Y)$, per one unit increase/decrease in $x_1$ holding the value of $x_2$ constant.
+                
+            - Important: No need to know the value of $x_2$.
+        
+    Hypothesis testing
+        
+            - We reject the null hypothesis that the effect of Per Capita GNP on childhood mortality is zero at the 1\% critical level, with a t-value of -2.82 and p-value of 0.0065.
+            - Similarly, we reject the null hypothesis of no relationship between female literacy rate and childhood mortality at the 1\% critical level. FLR has a t-value of -10.63 and a p-value of 0.0001.
+        
+\end{frame}
+%========================================================================================================================================
+\begin{frame}{Accident Data}{Setup}
+\begin{table}
+    \begin{center}
+        \begin{tabular}{ccc}\toprule
+        temperature & precipitation & accidents \\ \midrule
+        5           & 2             & 20        \\
+        29          & 0.5           & 11        \\
+        62          & 2             & 12        \\
+        75          & 0             & 4         \\
+        -7          & 2             & 31        \\
+        44          & 1             & 10        \\
+        32          & 2             & 12        \\
+        81          & 3             & 5         \\
+        72          & 1             & 7         \\
+        97          & 0.6           & 8         \\ \bottomrule
+        \end{tabular}
+    \end{center}
+\end{table}
+\end{frame}
+%========================================================================================================================================
+\begin{frame}[fragile]{Accident Data}{Results in R}
+\footnotesize \begin{verbatim}
+Call:
+lm(formula = accidents ~ temperature + precipitation, data = accidents)
+
+Residuals:
+   Min     1Q Median     3Q    Max
+-3.956 -2.521 -1.304  1.397  7.448
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)
+(Intercept)   20.00163    3.96673   5.042  0.00149 **
+temperature   -0.19477    0.04605  -4.229  0.00389 **
+precipitation  1.09371    1.69648   0.645  0.53967
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 4.549 on 7 degrees of freedom
+Multiple R-squared:  0.752,	Adjusted R-squared:  0.6811
+F-statistic: 10.61 on 2 and 7 DF,  p-value: 0.007599
+
+## Accident Data}{F-Test}
+%    Hypothesis: $H_0$: $\beta_1=\beta_2=0$
+%        \begin{equation*}
+%            \frac{R^2/(k-1)}{(1-R^2)/(n-k)} \sim F_{k-1,n-k}
+%        \end{equation*}
+%    Given the accident data: $n=10,k=3$
+%        \begin{equation*}
+%            \frac{0.752/2}{(1-0.752)/(10-3)} = 10.6129
+%        \end{equation*}
+%    This is different and an extension from the previous versions of hypothesis testing. We are not conducting hypothesis tests on the individual parameters but on all slope coefficients simultaneously.
+%\end{frame}
+%========================================================================================================================================
+%\begin{frame}{Comparing $R^2$ values}{Coffee Data}
+%    Comparing two $R^2$ values only if
+%        
+%            - Identical sample size
+%            - Identical dependent variable
+%        
+
+# Multicollinearity
+## Introduction
+    Example: Measuring the home value ($y$) based on number of bedrooms ($x_1$), bathrooms ($x_2$) and square footage ($x_3$).
+        
+            - Every bedroom has one bathroom, i.e., $x_1=x_2$
+        
+    Regression equation
+        \begin{align*}
+            y & = \beta_0+\beta_1 x_1+\beta_2 x_2+\beta_3 x_3\\
+              & = \beta_0+\beta_1 x_1+\beta_2 x_1+\beta_3 x_3\\
+              & = \beta_0+(\beta_1+\beta_2) x_1 +\beta_3 x_3
+        \end{align*}
+    Impossible to parse out the effects of $\beta_1$ and $\beta_2$.
+        
+            - Problem of small sample size.
+            - No implication for bias or consistency, but can inflate standard errors
+            - Make sure included variables are not too highly correlated with the variable of interest
+    
+\end{frame}
+%========================================================================================================================================
+\begin{frame}[fragile]{Multicollinearity 1}
+\footnotesize \begin{verbatim}
+Call:
+lm(formula = sat ~ income + expenditure, data = teaching)
+
+Residuals:
+     Min       1Q   Median       3Q      Max
+-21.4124  -6.3479   0.0499   5.5433  19.6356
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept) 7.503e+02  1.027e+01  73.077  < 2e-16 ***
+income      3.504e-03  1.117e-04  31.385  < 2e-16 ***
+expenditure 3.961e-02  6.020e-03   6.579 2.49e-09 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 8.987 on 96 degrees of freedom
+Multiple R-squared:  0.9125,	Adjusted R-squared:  0.9107
+F-statistic: 500.6 on 2 and 96 DF,  p-value: < 2.2e-16
+\end{verbatim}
+\end{frame}
+%========================================================================================================================================
+\begin{frame}[fragile]{Multicollinearity 2}
+\footnotesize \begin{verbatim}
+Call:
+lm(formula = sat ~ income + faculty, data = teaching)
+
+Residuals:
+    Min      1Q  Median      3Q     Max
+-22.684  -6.696  -0.653   6.569  21.584
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept) 7.727e+02  8.653e+00  89.290  < 2e-16 ***
+income      3.447e-03  1.163e-04  29.630  < 2e-16 ***
+faculty     2.259e+00  4.180e-01   5.403 4.75e-07 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 9.48 on 96 degrees of freedom
+Multiple R-squared:  0.9027,	Adjusted R-squared:  0.9006
+F-statistic: 445.1 on 2 and 96 DF,  p-value: < 2.2e-16
+\end{verbatim}
+\end{frame}
+%========================================================================================================================================
+\begin{frame}[fragile]{Multicollinearity 3}
+\footnotesize \begin{verbatim}
+Call:
+lm(formula = sat ~ income + expenditure + faculty, data = teaching)
+
+Residuals:
+     Min       1Q   Median       3Q      Max
+-21.5999  -6.4151   0.3766   5.0607  18.9443
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept) 7.513e+02  1.038e+01  72.354  < 2e-16 ***
+income      3.508e-03  1.120e-04  31.312  < 2e-16 ***
+expenditure 3.368e-02  1.002e-02   3.362  0.00112 **
+faculty     4.886e-01  6.596e-01   0.741  0.46062
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 9.008 on 95 degrees of freedom
+Multiple R-squared:  0.913,	Adjusted R-squared:  0.9103
+F-statistic: 332.3 on 3 and 95 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+# Model Specification
+## Exclusion of Relevant Variables
+Correct model:
+$$y = \beta_0 + \beta_1 x_1 + \beta_2 \cdot x_2 + \epsilon$$
+Estimated model:
+$$y = \beta_0 + \beta_1 \cdot x_1 + \epsilon$$
+Question: Is the estimate of $\beta_1$ biased, i.e., incorrect?
+$$E(\hat{\beta}_1) = \beta_1 + \beta_2 \cdot \frac{Cov(x_1,x_2)}{Var(x_1)}$$
+The estimate of $\beta_1$ is correct only if $x_1$ and $x_2$ are uncorrelated.
+%\end{frame}
+%========================================================================================================================================
+%\begin{frame}[fragile]{Model Specification}{Exclusion of Relevant Variables: Correct Model with Small Covariance}
+%\scriptsize \begin{verbatim}
+%Call:
+%lm(formula = y ~ x_1 + x_2, data = spec1)
+%
+%Residuals:
+%    Min      1Q  Median      3Q     Max
+%-30.376  -6.321  -0.166   6.609  34.944
+%
+%Coefficients:
+%            Estimate Std. Error t value Pr(>|t|)
+%(Intercept) 47.07555    1.17863   39.94   <2e-16 ***
+%x_1          4.03382    0.01544  261.18   <2e-16 ***
+%x_2          5.02018    0.01524  329.45   <2e-16 ***
+%---
+%Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+%
+%Residual standard error: 9.997 on 496 degrees of freedom
+%Multiple R-squared:  0.9971,	Adjusted R-squared:  0.9971
+%F-statistic: 8.606e+04 on 2 and 496 DF,  p-value: < 2.2e-16
+%\end{verbatim}
+%\end{frame}
+%========================================================================================================================================
+%\begin{frame}[fragile]{Model Specification}{Exclusion of Relevant Variables: Incorrect Model with Small Covariance}
+%\scriptsize \begin{verbatim}
+%Call:
+%lm(formula = y ~ x_1, data = spec1)
+%
+%Residuals:
+%     Min       1Q   Median       3Q      Max
+%-254.064 -138.325    0.918  132.183  262.461
+%
+%Coefficients:
+%            Estimate Std. Error t value Pr(>|t|)
+%(Intercept) 298.8411    13.2904   22.49   <2e-16 ***
+%x_1           3.8933     0.2287   17.03   <2e-16 ***
+%---
+%Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+%
+%Residual standard error: 148.1 on 497 degrees of freedom
+%Multiple R-squared:  0.3684,	Adjusted R-squared:  0.3671
+%F-statistic: 289.9 on 1 and 497 DF,  p-value: < 2.2e-16
+%\end{verbatim}
+%\end{frame}
+%========================================================================================================================================
+%\begin{frame}[fragile]{Model Specification}{Exclusion of Relevant Variables: Correct Model with Large Covariance}
+%\scriptsize \begin{verbatim}
+%Call:
+%lm(formula = y ~ x_1 + x_2, data = spec2)
+%
+%Residuals:
+%    Min      1Q  Median      3Q     Max
+%-29.883  -6.473   0.067   6.594  35.140
+%
+%Coefficients:
+%            Estimate Std. Error t value Pr(>|t|)
+%(Intercept) 47.85930    0.97006   49.34   <2e-16 ***
+%x_1          4.02656    0.01879  214.27   <2e-16 ***
+%x_2          5.01160    0.01854  270.30   <2e-16 ***
+%---
+%Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+%
+%Residual standard error: 10.01 on 496 degrees of freedom
+%Multiple R-squared:  0.9982,	Adjusted R-squared:  0.9982
+%F-statistic: 1.365e+05 on 2 and 496 DF,  p-value: < 2.2e-16
+%\end{verbatim}
+%\end{frame}
+%========================================================================================================================================
+%\begin{frame}[fragile]{Model Specification}{Exclusion of Relevant Variables: Incorrect Model with Large Covariance}
+%\scriptsize \begin{verbatim}
+%Call:
+%lm(formula = y ~ x_1, data = spec2)
+%
+%Residuals:
+%    Min      1Q  Median      3Q     Max
+%-305.31  -88.07   -0.82   96.47  333.94
+%
+%Coefficients:
+%            Estimate Std. Error t value Pr(>|t|)
+%(Intercept) 146.6677    10.9316   13.42   <2e-16 ***
+%x_1           6.9140     0.1881   36.76   <2e-16 ***
+%---
+%Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+%
+%Residual standard error: 121.8 on 497 degrees of freedom
+%Multiple R-squared:  0.7311,	Adjusted R-squared:  0.7306
+%F-statistic:  1351 on 1 and 497 DF,  p-value: < 2.2e-16
+%\end{verbatim}
+%\end{frame}
+%========================================================================================================================================
+%\begin{frame}{Model Specification}{Inclusion of Irrelevant Variables}
+%    Correct model:
+%    \begin{equation*}
+%        y = \beta_0 + \beta_1 x_1  + \epsilon
+%    \end{equation*}
+%    Estimated model:
+%    \begin{equation*}
+%        y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \epsilon
+%    \end{equation*}
+%    Question: Is the estimate of $\beta_1$ biased, i.e., incorrect?
+%    $\Rightarrow$ Estimation of $\beta_1$ will be correct but the variance will be too high.
+
+# Dummy Variables
+## Overview
+Representation of a single qualitative characteristics coded as 0 or 1
+
+- Examples: Religion, gender, nationality, all-wheel drive (AWD), hardwood floors
+        
+Used car examples where the $price$ depends on $miles$ and $AWD$ (i.e., a dummy variable):
+$$price_i = \beta_0 + \beta_1 \cdot miles_i + \beta_2 \cdot AWD_i + \epsilon_i$$
+with $AWD_i=1$ for an all-wheel drive car and $AWD_i=0$ for a car with no all-wheel drive. This regression can theoretically be separated into two single equations:
+        \begin{enumerate}
+            - RWD: $Y_i = \beta_0 + \beta_1 X_i + \epsilon_i$
+            - AWD: $Y_i = (\beta_0 + \beta_2 )+ \beta_1 X_i + \epsilon_i$
+        \end{enumerate}
+
+Interpretation:
+        
+            - Knowledge on how the dummy-variable was coded.
+            - If the coefficient of the dummy-variable ``adds'' (or ``subtracts'' if sign is negative) compared to the 0-group.
+        
+\end{frame}
+%========================================================================================================================================
+\begin{frame}[fragile]{Dummy Variables}{Interpretation}
+\footnotesize \begin{verbatim}
+Call:
+lm(formula = price ~ miles + x, data = bmw)
+
+Residuals:
+    Min      1Q  Median      3Q     Max
+-3874.1 -1724.0  -176.5  1604.5  5355.0
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)
+(Intercept)  4.047e+04  1.711e+03  23.660  < 2e-16 ***
+miles       -2.728e-01  4.044e-02  -6.745 3.05e-07 ***
+x            3.429e+03  1.063e+03   3.227  0.00327 **
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 2449 on 27 degrees of freedom
+Multiple R-squared:  0.6287,	Adjusted R-squared:  0.6012
+F-statistic: 22.86 on 2 and 27 DF,  p-value: 1.553e-06
+\end{verbatim}
+
+Regressions Involving Natural Logarithms}
+    Consider the log-linear model:
+        \begin{equation*}
+            y_i = \beta_0 \cdot x_i^{\beta_1} \cdot \epsilon_i
+        \end{equation*}
+    Taking the natural logarithm on both sides
+        \begin{equation*}
+            \ln(y_i) = \ln(\beta_0) + \beta_1 \cdot \ln(x_i) + \epsilon_i
+        \end{equation*}
+    You can choose which variables you want to transform using the natural log. You can transform just the dependent variable and/or all (or just some) of the independent variables. However, the interpretation of the $\beta$ coefficients will change depending on your approach.
+\end{frame}
+%========================================================================================================================================
+\begin{frame}
+    \begin{table}
+        \begin{center}
+            \begin{tabular}{ccc}\toprule
+              Dep. Var. & Indep. Var.   & Interpretation \\ \midrule
+               $y$      & $x$           & $\Delta y = \beta \cdot \Delta x $\\
+               $y$      & $\ln(x)$      & $\Delta y = (\beta /100)\% \cdot \Delta x$ \\
+               $\ln(y)$ & $x$           & $\% \Delta y = (100 \cdot \beta)\cdot \Delta x$  \\
+               $\ln(y)$ & $\ln(x)$      & $\% \Delta y = \beta \% \cdot \Delta x$ \\ \bottomrule
+            \end{tabular}
+        \end{center}
+    \end{table}
+\end{frame}
+%========================================================================================================================================
+%\begin{frame}{Dummy Variables}{Interpretation when the Dependent Variable is $\ln(\cdot)$}
+%    Consider the following model:
+%        \begin{equation*}
+%            \ln(y) = \beta_0+\beta_1 \cdot X + \beta_2 \cdot D + \epsilon
+%        \end{equation*}
+%    In this case, $X$ is the continuous independent variable and $D$ is the dummy variable. $\beta_2$ is interpreted as follows:
+%        
+%            - If $D$ switches from 0 to 1, the \% impact of $D$ on $Y$ is $100 \cdot e^{\beta_2}-1$.
+%            - If $D$ switches from 1 to 0, the \% impact of $D$ on $Y$ is $100 \cdot e^{\beta_2}−1$.
+%        
+%\end{frame}
+%========================================================================================================================================
+\begin{frame}{Dummy Variables}{Interpretation when the Dependent Variable is $\ln(\cdot)$}
+    Consider the following model:
+        \begin{equation*}
+            \ln(y) = \beta_0 + \beta_1 \cdot x_1 + \beta_2 \cdot D + \epsilon
+        \end{equation*}
+    In this case, the interpretation of $\beta_1$ is $e^{\beta}-1$. So in the regression on the next slide, we have the coefficient for colonial which is 0.0538. Thus the feature ``colonial'' adds 5.53\% to the value of the house.
+\end{frame}
+%========================================================================================================================================
+\begin{frame}[fragile]{Dummy Variables}{Example: Interpretation when the Dependent Variable is $\ln(\cdot)$}
+\footnotesize \begin{verbatim}
+Call:
+lm(formula = log(price) ~ log(lotsize) + log(sqrft) + bdrms +
+    colonial, data = housing1)
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept)  -1.34959    0.65104  -2.073   0.0413 *
+log(lotsize)  0.16782    0.03818   4.395 3.25e-05 ***
+log(sqrft)    0.70719    0.09280   7.620 3.69e-11 ***
+bdrms         0.02683    0.02872   0.934   0.3530
+colonial      0.05380    0.04477   1.202   0.2330
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.1841 on 83 degrees of freedom
+Multiple R-squared:  0.6491,	Adjusted R-squared:  0.6322
+F-statistic: 38.38 on 4 and 83 DF,  p-value: < 2.2e-16
+\end{verbatim}
+\end{frame}
+%========================================================================================================================================
+%\begin{frame}{Functional Form}
+%    Examples:
+%        
+%            - Relation between consumption and income: Change in consumption due to extra income may decrease with income.
+%            - Relationship between income and education: Change in income due to more education may decrease with more education
+%        
+%    Consider the following relationships between $y$ and $x$:
+%        \begin{enumerate}
+%            - $y = \beta_0 + \beta_1 x + \beta_2 x^2$
+%            - $y = \beta_0 + \beta_1 x^{\beta_2}$
+%        \end{enumerate}
+%    If a nonlinear relation can be expressed as a linear relation by redefining variables we can estimate that relation using ordinary least square.
+%\end{frame}
+%========================================================================================================================================
+%\begin{frame}{Functional Form}
+%    Relationship 1:
+%        
+%            - Linear in the regression coefficients, i.e. it can be expressed as a linear relation between $y$ and independent variables $x_1$ and $x_2$: $x_1 = x$ and $x_2 = x^2$
+%        
+%    Relationship 2:
+%        
+%            - Taking the log of the dependent/indepedent variable can help linearizing the model.
+%        
+%\end{frame}
+
+%========================================================================================================================================
+%\begin{frame}{Regressions Involving Natural Logarithms: Interpretation}
+%    Case 1: $\ln(consumption) = \beta_0 +\beta_1 \cdot \ln(income)$
+%        
+%            - Assume $\beta_1 = 0.8$: A 1\% increase in income results in a $0.8 \cdot 1\% = 0.8\% $ increase in consumption.
+%        
+%\end{frame}
+%========================================================================================================================================
+
+
+
+%========================================================================================================================================
+\begin{frame}{Functional Form: Squared/Quadratic Terms}
+    Consider a model with $x_2$ included as a squared term:
+    \begin{equation*}
+        y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_2^2
+    \end{equation*}
+    Change in $y$ due to a change in $x$:
+    \begin{equation*}
+        \Delta \hat{y} \approx (\hat{\beta}_2 + 2 \cdot \hat{\beta}_2) \Delta x
+    \end{equation*}
+
+\end{frame}
+%========================================================================================================================================
+\begin{frame}{Functional Form: Squared/Quadratic Terms}
+    \begin{figure}
+        \begin{center}
+            \includegraphics[width=7in]{quadfun}
+        \end{center}
+    \end{figure}
+\end{frame}
+%========================================================================================================================================
+\begin{frame}[fragile]{Functional Form: Squared/Quadratic Terms}{Results in R}
+\footnotesize \begin{verbatim}
+Call:
+lm(formula = income ~ educ + exper + I(exper^2), data = wage)
+
+Residuals:
+    Min      1Q  Median      3Q     Max
+-6.1134 -2.1056 -0.5476  1.2517 15.0251
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)
+(Intercept) -4.0079730  0.7552203  -5.307 1.65e-07 ***
+educ         0.5992640  0.0532414  11.256  < 2e-16 ***
+exper        0.2686777  0.0370474   7.252 1.49e-12 ***
+I(exper^2)  -0.0046121  0.0008253  -5.588 3.70e-08 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 3.179 on 522 degrees of freedom
+Multiple R-squared:  0.2696,	Adjusted R-squared:  0.2654
+F-statistic: 64.23 on 3 and 522 DF,  p-value: < 2.2e-16
+\end{verbatim}
+\end{frame}
+%========================================================================================================================================
+\begin{frame}[fragile]{Functional Form: Squared/Quadratic Terms}{Results in R using \emph{hprice2.csv}}
+\footnotesize \begin{verbatim}
+Call:
+lm(formula = log(price) ~ log(nox) + log(dist) + rooms + I(rooms^2) +
+    stratio)
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept) 13.385477   0.566473  23.630  < 2e-16 ***
+log(nox)    -0.901682   0.114687  -7.862 2.34e-14 ***
+log(dist)   -0.086781   0.043281  -2.005  0.04549 *
+rooms       -0.545113   0.165454  -3.295  0.00106 **
+I(rooms^2)   0.062261   0.012805   4.862 1.56e-06 ***
+stratio     -0.047590   0.005854  -8.129 3.42e-15 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.2592 on 500 degrees of freedom
+Multiple R-squared:  0.6028,	Adjusted R-squared:  0.5988
+F-statistic: 151.8 on 5 and 500 DF,  p-value: < 2.2e-16
+\end{verbatim}
+\end{frame}
+%========================================================================================================================================
+%\begin{frame}{Interpretation of the Room Coefficients} %{Piecewise Linear Regression}
+%    \begin{align*}
+%      \% \delta p   & \approx 100 \left[ (-0.545+2 \cdot 0.062) \cdot rooms \right] \cdot \delta rooms \\
+%                    & (-54.5 +12.44 \cdot rooms) \delta rooms
+%    \end{align*}
+%    Thus going from 5 to 6 rooms increases the price by 7.7\%.
+%\end{frame}
+%========================================================================================================================================
+%\begin{frame}{Interaction Effect}
+%    Assumptions so far:
+%        
+%            - Change in an independent variable translates into variations of the dependent variable irrespective of the level of some other independent variable.
+%            - Example:
+%        
+%\end{frame}
+
+
+\begin{frame}[fragile]{Interaction Term}
+\footnotesize \begin{verbatim}
+Call:
+lm(formula = log(wage) ~ educ + I(educ * pareduc) + exper + tenure,
+    data = wage2)
+
+Residuals:
+     Min       1Q   Median       3Q      Max
+-1.85839 -0.23760  0.01424  0.25882  1.28750
+
+Coefficients:
+                   Estimate Std. Error t value Pr(>|t|)
+(Intercept)       5.6465188  0.1295593  43.582  < 2e-16 ***
+educ              0.0467522  0.0104767   4.462 9.41e-06 ***
+I(educ * pareduc) 0.0007750  0.0002107   3.677 0.000253 ***
+exper             0.0188710  0.0039429   4.786 2.07e-06 ***
+tenure            0.0102166  0.0029938   3.413 0.000679 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.3834 on 717 degrees of freedom
+  (213 observations deleted due to missingness)
+Multiple R-squared:  0.169,	Adjusted R-squared:  0.1643
+F-statistic: 36.44 on 4 and 717 DF,  p-value: < 2.2e-16
+\end{verbatim}
+\end{frame}
+%========================================================================================================================================
+%\begin{frame}{Interaction}{Data: \texttt{depression.csv}}
+%    Data about 36 individuals receiving treatment for depression
+%            
+%                - $y$ measure of effectiveness
+%            
+%\end{frame}
+%========================================================================================================================================
+%\begin{frame}[fragile]{Interaction Term}
+%\scriptsize \begin{verbatim}
+%Call:
+%lm(formula = y ~ age + x2 + x3 + I(age * x2) + I(age * x3), data = depression)
+%
+%Coefficients:
+%            Estimate Std. Error t value Pr(>|t|)
+%(Intercept)  6.21138    3.34964   1.854 0.073545 .
+%age          1.03339    0.07233  14.288 6.34e-15 ***
+%x2          41.30421    5.08453   8.124 4.56e-09 ***
+%x3          22.70682    5.09097   4.460 0.000106 ***
+%I(age * x2) -0.70288    0.10896  -6.451 3.98e-07 ***
+%I(age * x3) -0.50971    0.11039  -4.617 6.85e-05 ***
+%---
+%Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+%
+%Residual standard error: 3.925 on 30 degrees of freedom
+%Multiple R-squared:  0.9143,	Adjusted R-squared:  0.9001
+%F-statistic: 64.04 on 5 and 30 DF,  p-value: 4.264e-15
+%\end{verbatim}
+%\end{frame}
+%========================================================================================================================================
+%\begin{frame}{Interaction Effects}
+%    Consider the data set of 36 depressed individuals and the effects of three different treatments:
+%        
+%            - $y_i$ = effectiveness of treatment on individual $i$
+%            - $age$ as the age of the individual
+%            - $x2$ and $x3$ as treatment dummies
+%        
+%    The model can be written as follows:
+%        \begin{equation*}
+%            y_i = \beta_0 + \beta_1 \cdot age + \beta_2 \cdot x_2 + \beta_3 \cdot x_3 + \beta_4 \cdot age \cdot x_2 + \beta_5 \cdot age \cdot x_3
+%        \end{equation*}
+%\end{frame}
+%========================================================================================================================================
+%\begin{frame}{Regression Diagnostics: Anscombe's Quartet}
+%    \begin{figure}
+%        \begin{center}
+%            \includegraphics[width=3.25in]{anscombe}
+%        \end{center}
+%    \end{figure}
+%\end{frame}
+
+\end{document} 

@@ -50,7 +50,7 @@ Evolution of the stock market
 ## Scottish Ministers' Widows' Fund
 Preceding work
 
-- Edmond Halley's (same as comet) life tables for the city of Breslau (today Wroc\l aw)
+- Edmond Halley's (same as comet) life tables for the city of Breslau (today Wroc\l aw) in 1693
 - Detailed work on birth and death by age
 
 Insurance fund calculations in 1744 by Alexander Webster and Robert Wallace:

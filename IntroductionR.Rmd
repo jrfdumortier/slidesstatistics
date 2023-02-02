@@ -245,7 +245,7 @@ Suppose you are only interested in the variables *ghgScore* and *VClass* for the
         
 - `cars2015 = subset(vehicles,year==2015,select=c("ghgScore","VClass"))`
         
-Get glimpse at the results: `table(cars2015\$VClass,cars2015\$ghgScore)`
+Get glimpse at the results: `table(cars2015$VClass,cars2015$ghgScore)`
 
 ## Basic Handling of Data Frames II
 Suppose you are only interested in *Compact Cars* and *Large Cars* in the column *VClass* for the year 2015. There the notation is a bit odd (note that the many line breaks are not necessary to include in R):
