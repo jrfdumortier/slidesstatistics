@@ -1,0 +1,432 @@
+---
+title: "Limited Dependent Variable Models"
+author: "Jerome Dumortier"
+date: "`r format(Sys.time(),'%d %B %Y')`"
+output: 
+     beamer_presentation:
+          theme: "Hannover"
+classoption: "aspectratio=169"
+linkcolor: MidnightBlue
+---
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
+load("G:/My Drive/Teaching/Data Analysis for Public Affairs/GitHub/DataAnalysisPAData.RData")
+library(AER)
+library(censReg)
+library(foreign)
+library(MASS)
+library(pscl)
+library(stargazer)
+library(truncreg)
+library(vcdExtra)
+```
+
+# Overview
+## Packages and Files
+Required packages:
+        
+- [AER](https://cran.r-project.org/web/packages/AER/index.html)
+- [censReg](https://cran.r-project.org/web/packages/censReg/index.html)
+- [foreign](https://cran.r-project.org/web/packages/foreign/index.html)
+- [MASS](https://cran.r-project.org/web/packages/MASS/index.html)
+- [pscl](https://cran.r-project.org/web/packages/pscl/index.html)
+- [truncreg](https://cran.r-project.org/web/packages/truncreg/index.html)
+
+Required files:
+```{r}
+data("NMES1988",package="AER")
+```
+
+## Topics Covered
+Regression models in which the dependent variable is somehow limited:
+
+- Truncated data: Values above and/or below particular points are not reported
+- Censored data: Values above and/or below particular points are reported at those points
+- Count data: Discrete, integer count value 
+- Survival/duration data: Time to a certain event 
+
+# Truncation
+## Overview
+Concept
+
+- Value above and/or below a certain point are not part of the data 
+
+Examples
+
+- Low income household studies
+- On-site visitation data (unobserved non-visitors)
+- Employment data on hours worked (excludes unemployed)
+
+Simulated data
+
+- "True" Coefficients: $\beta_0=-2$ and $\beta_1=0.5$
+- Values $y<0$ are not reported in the data
+
+Next slide: The green regression line is "correct" whereas the "red" is the line obtained from a regression model which ignores the truncation.  
+
+## Graphical Illustration 
+```{r,echo=FALSE,fig.width=10,fig.height=5}
+bhat_real           = lm(y_real~x,data=truncation)
+bhat_truncated      = lm(y_obs~x,data=truncation)
+plot(truncation$x,truncation$y_obs,xlim=c(0,10),ylim=c(-3,5),pch=19,ylab="y",xlab="x")
+     points(truncation$x,truncation$y_real)
+     abline(bhat_real,col=c("darkgreen"))
+     abline(bhat_truncated,col=c("red"))
+```
+
+## Setup for `truncation` Data
+```{r}
+truncation1    = truncation[c("y_real","x")]
+truncation2    = subset(truncation,y_obs>0,select=c("y_obs","x"))
+bhat_real      = lm(y_real~x,data=truncation1)
+bhat_truncated = lm(y_obs~x,data=truncation2)
+```
+
+Required package to estimate a truncated model
+
+-  [truncreg](https://cran.r-project.org/web/packages/truncreg/index.html)
+
+Additional variable output $sigma$:
+
+- Related to the truncated normal distribution
+
+## Results: Complete Data
+\scriptsize
+```{r,echo=FALSE}
+summary(bhat_real)
+```
+\normalsize 
+
+## Results: Truncated Data with Regular OLS
+\scriptsize
+```{r,echo=FALSE}
+summary(bhat_truncated)
+```
+\normalsize
+
+## Results: Correcting for Truncation
+\scriptsize
+```{r,echo=FALSE}
+bhat_correct = truncreg(y_obs~x,data=truncation2,
+                        point=0,direction="left")
+summary(bhat_correct)
+```
+
+## Achievement Scores: Data Load and Description
+Loading the data using the package [foreign](https://cran.r-project.org/web/packages/foreign/index.html)
+```{r}
+url         = "https://stats.idre.ucla.edu/stat/data/truncreg.dta"
+achievement = read.dta(url)
+```
+
+Description of the data from [UCLA Source](https://stats.oarc.ucla.edu/r/dae/truncated-regression/):
+
+*"A study of students in a special GATE (gifted and talented education) program wishes to model achievement as a function of language skills and the type of program in which the student is currently enrolled. A major concern is that students are required to have a minimum achievement score of 40 to enter the special program. Thus, the sample is truncated at an achievement score of 40."*
+
+## Achievement Scores: Regular OLS Estimation
+\scriptsize
+```{r,echo=FALSE}
+bhat_ols = lm(achiv~langscore+prog,data=achievement)
+summary(bhat_ols)
+```
+\normalsize
+
+## Achievement Scores: Truncated Model
+\scriptsize
+```{r,echo=FALSE}
+bhat_tr = truncreg(achiv~langscore+prog,data=achievement,
+              point=40,direction="left")
+summary(bhat_tr)
+```
+\normalsize
+
+# Censoring
+## Overview
+Concept
+
+- Value above and/or below a certain point are not part of the data 
+
+Examples
+
+- Capacity constrained data, e.g., class enrollments or ticket sales
+- Hours worked (or leisure demand), which is essentially capacity constrained
+- Commodity purchases (non-negative)
+
+Simulated data
+
+- "True" Coefficients: $\beta_0=-2$ and $\beta_1=0.5$
+- Values $y<0$ are reported at 0
+
+R package [censReg](https://cran.r-project.org/web/packages/censReg/index.html) to reduce bias
+
+## Graphical Illustration
+```{r,echo=FALSE,fig.width=10,fig.height=5}
+bhat_real = lm(yreal~x,data=censoring)
+bhat_censored = lm(y~x,data=censoring)
+plot(censoring$x,censoring$yreal)
+     points(censoring$x,censoring$y,pch=19)
+     abline(bhat_real,col=c("darkgreen"))
+     abline(bhat_censored,col=c("red"))
+```
+
+## Results: Full Data
+\scriptsize
+```{r,echo=FALSE}
+summary(bhat_real)
+```
+\normalsize
+
+## Results: Censored Data with Regular OLS
+\scriptsize
+```{r,echo=FALSE}
+summary(bhat_censored)
+```
+\normalsize
+
+## Estimation of a Censored Model
+\footnotesize
+```{r,echo=FALSE}
+b_correct = censReg(y~x,data=censoring)
+summary(b_correct)
+```
+\normalsize
+
+# Count Models
+## Overview
+Dependent variable
+
+- Discrete, integer count data
+
+Examples
+
+- What are the number of arrests for a person?
+- What determines the number of credit cards a person owns? 
+
+Three count data models
+
+1. Poisson regression 
+2. Quasi-Poisson Regression Model
+2. Negative Binomial Regression Model
+
+Choice criteria: Presence or absence of overdispersion
+
+- Overdispersion Variance of the dependent variable is larger than its mean.
+- Poisson model is not suitable for overdispersion
+
+## Packages
+The main package used is [pscl](https://cran.r-project.org/web/packages/pscl/index.html). There is also an additional resource with more theoretical details on the topic: [Regression Models for Count Data in R](http://dx.doi.org/10.18637/jss.v027.i08). A more up-to-date version of the document may be found with the [pscl](https://cran.r-project.org/web/packages/pscl/index.html) package documentation. 
+
+## Poisson Regression Model
+Recall Poisson distribution:
+$$Pr(Y=k)=\frac{e^{-\lambda} \cdot \lambda^k}{k!}$$
+Equidispersion as key characteristics:
+
+- Mean and variance equal to $\lambda$, i.e., $E(Y)=\lambda$ and $Var(Y)=\lambda$
+- Poisson regression: $\lambda=exp(\beta_0+\beta_1 \cdot x_1+ \dots + \beta_k \cdot x_k)$.
+
+## NHTS Example: Number of Vehicles (`hhpub`)
+Data source
+
+- 2017 [National Household Travel Survey](https://nhts.ornl.gov/) 
+- Survey quantifying trip and travel habits across the United States
+- Example use: Quantifying intra-day electricity demand from electric vehicles
+
+Outcome of interest
+
+- Number of vehicles based on household income, home ownership, and urban/rural household location
+
+Data preparation
+
+- Elimination of missing and unknown data value
+- Conversion of income to 1,000 dollars
+
+## Data Preparation
+```{r poissonregression_cleanhhpub,results=FALSE}
+hhpubdata           = subset(hhpub,HHFAMINC %in% c(1:11) & 
+                                   HOMEOWN %in% c(1,2) & 
+                                   URBRUR %in% c(1,2) & 
+                                   HHVEHCNT %in% c(0:12))
+HHFAMINC            = c(1:11)
+INCOME              = c(10,12.5,20,30,42.5,57.5,82.5,112.5,137.5,
+                        175,200)
+INCOME              = data.frame(HHFAMINC,INCOME)
+hhpubdata           = merge(hhpubdata,INCOME)
+hhpubdata$RURAL     = hhpubdata$URBRUR-1
+hhpubdata$RENT      = hhpubdata$HOMEOWN-1
+```
+
+## Poisson Model Execution
+Preliminary step: Calculation of mean and variance of dependent variable
+```{r}
+mean(hhpubdata$HHVEHCNT)
+var(hhpubdata$HHVEHCNT)
+```
+
+Similar values and thus, Poisson regression model as an appropriate first step. 
+
+```{r}
+bhat_pois = glm(HHVEHCNT~INCOME+RENT+RURAL,
+                data=hhpubdata,family=poisson)
+```
+
+## Results
+\tiny
+```{r,echo=FALSE}
+summary(bhat_pois)
+```
+\normalsize
+
+## Interpretation
+Sign of coefficients as an indication of the direction of influence on the outcome variable, i.e., the number of cars. 
+
+- Association of higher income and rural living with a higher number of car
+- Association of renting with lower number of vehicles. 
+- Possible correlation between income and renting 
+
+General coefficient interpretation using $\exp(\beta)$, i.e., every unit increase in $X$ has a multiplicative effect of $\exp(\beta)$ on the mean of $Y$, i.e., $\lambda$:
+
+- $\beta=0 \Rightarrow \exp(\beta)=1$: $Y$ and $X$ are not related.
+- $\beta>0 \Rightarrow \exp(\beta)>1$: Expected count $E(y)$ is $\exp(\beta)$ times larger than when $X = 0$
+- $\beta<0  \Rightarrow \exp(\beta)<1$: Expected count $E(y)$ is $\exp(\beta)$ times smaller than when $X = 0$
+
+## Testing for Overdispersion I
+Function `overdispersion()` from the package [AER](https://cran.r-project.org/web/packages/AER/index.html):
+
+- Tests the null hypothesis of equidispersion (i.e., assuming no overdispersion)
+
+Executed after the main regression using `glm(...,family=poisson)` 
+
+## Testing for Overdispersion II
+```{r}
+dispersiontest(bhat_pois)
+```
+
+Given the *p*-value, the null hypothesis cannot be rejected. If the data suggests overdispersion, two alternative regression models can be used: (1) Quasi-Poisson and (2) Negative Binomial.
+
+## Quasi-Poisson Regression Model
+Dataset `blm` from article [Black Lives Matter: Evidence that Police-Caused Deaths Predict Protest Activity](https://doi.org/10.1017/S1537592717004273). 
+
+- Dependent variable: Total number of protests in a city
+- Note that the paper includes a significant number of supplementary materials which allows for the replication of the results and much more.  
+
+First step: Calculation of mean and variance of the variable $totalprotests$:
+
+```{r}
+mean(blm$totprotests)
+var(blm$totprotests)
+```
+
+## Presence of Overdispersion
+The variance is significantly higher than the mean which suggests overdispersion. In a first step, a regular Poisson model is estimated.
+
+```{r}
+eq1       = "totprotests~log(pop)+log(popdensity)+percentblack+
+             blackpovertyrate+I(blackpovertyrate^2)+
+             percentbachelor+collegeenrollpc+demshare"
+bhat1     = glm(eq1,data=blm,family=poisson)
+```
+
+## Estimation Results
+\tiny
+```{r,echo=FALSE}
+summary(bhat1)
+```
+\normalsize
+
+## Testing for Overdispersion
+```{r,echo=FALSE}
+dispersiontest(bhat1)
+```
+Null hypothesis rejected at 10\% but not 5\% significance level. The Quasi-Poisson Regression Model handles overdispersion by adjusting standard errors but leaving the coefficient estimates the same.
+
+## Estimation Results: Quasipoisson
+\tiny
+```{r,echo=FALSE}
+bhat2 = glm(eq1,data=blm,family=quasipoisson)
+summary(bhat2)
+```
+\normalsize
+Note that in this case, the population density is not statistically significant anymore. 
+
+## Negative Binomial Regression Model
+The Negative Binomial Regression Model can be used in the presence of count data and overdispersion. Below, the results from the article [Black Lives Matter: Evidence that Police-Caused Deaths Predict Protest Activity](https://doi.org/10.1017/S1537592717004273) are recreated using the negative binomial models presented in the paper. 
+
+Three models:
+
+1. Resource mobilization and opportunity structure
+2. Adding black death
+3. Adding all police-caused deaths instead (victims of any race)
+
+## BLM Model I
+```{r}
+bhat3 = glm.nb(eq1,data=blm,link=log)
+```
+
+## BLM Model II
+```{r}
+bhat4     = glm.nb(totprotests~log(pop)+log(popdensity)+
+                        percentblack+blackpovertyrate+
+                        I(blackpovertyrate^2)+percentbachelor+
+                        collegeenrollpc+demshare+
+                        deathsblackpc,data=blm,link=log)
+```
+
+## BLM Model III
+```{r}
+bhat5     = glm.nb(totprotests~log(pop)+log(popdensity)+
+                        percentblack+blackpovertyrate+
+                        I(blackpovertyrate^2)+percentbachelor+
+                        collegeenrollpc+demshare+
+                        deathspc,data=blm,link=log)
+```
+
+```{r,echo=FALSE}
+knitr::knit_exit()
+```
+
+# Hurdle and Zero-Inflation Models
+## Overview
+Problem:
+
+- Presence of many observations at 0 in count data
+- Issues using Poisson or a Negative-Binomial Regression Model. 
+
+Application of hurdle and zero-inflation models:
+
+- Data `NMES1988` from the package [AER](https://cran.r-project.org/web/packages/AER/index.html) 
+- Data BLM protests 
+
+`NMES1988` Data:
+
+- 4406 observations of people on Medicare who are 66 years or older. 
+- Outcome of interest: Number of doctor $visits$ 
+- Independent variables: $hospital$ (number of hospital visits), $health$ (self-indicated health status), $chronic$ (number of chronic conditions), $gender$, $school$, and $insurance$. 
+
+## Estimation
+```{r}
+eq        = visits~hospital+health+chronic+gender+school+insurance
+bhat_pois = glm(eq,data=NMES1988,family=poisson)
+bhat_nb   = glm(eq,data=NMES1988)
+bhat_hurdle = hurdle(eq,data=NMES1988,dist="negbin")
+```
+
+## Results
+\tiny
+```{r,warning=FALSE,message=FALSE}
+summary(bhat_pois)
+```
+\normalsize
+
+## Results
+\tiny
+```{r}
+summary(bhat_nb)
+```
+\normalsize
+
+## Results
+\tiny
+```{r}
+summary(bhat_hurdle)
+```
+\normalsize
