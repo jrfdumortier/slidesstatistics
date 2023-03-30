@@ -17,6 +17,8 @@ library(foreign)
 library(MASS)
 library(pscl)
 library(stargazer)
+library(survival)
+library(survminer)
 library(truncreg)
 library(vcdExtra)
 ```
@@ -30,6 +32,9 @@ Required packages:
 - [foreign](https://cran.r-project.org/web/packages/foreign/index.html)
 - [MASS](https://cran.r-project.org/web/packages/MASS/index.html)
 - [pscl](https://cran.r-project.org/web/packages/pscl/index.html)
+- [stargazer](https://cran.r-project.org/web/packages/stargazer/index.html)
+- [survival](https://cran.r-project.org/web/packages/survival/index.html)
+- [survminer](https://cran.r-project.org/web/packages/survminer/index.html)
 - [truncreg](https://cran.r-project.org/web/packages/truncreg/index.html)
 
 Required files:
@@ -90,27 +95,21 @@ Additional variable output $sigma$:
 
 - Related to the truncated normal distribution
 
-## Results: Complete Data
-\scriptsize
+## Complete vs. Truncated Data with Regular OLS
+\tiny
 ```{r,echo=FALSE}
-summary(bhat_real)
+stargazer(bhat_real,bhat_truncated,type="text",no.space=TRUE)
 ```
 \normalsize 
 
-## Results: Truncated Data with Regular OLS
-\scriptsize
-```{r,echo=FALSE}
-summary(bhat_truncated)
-```
-\normalsize
-
 ## Results: Correcting for Truncation
-\scriptsize
+\tiny
 ```{r,echo=FALSE}
 bhat_correct = truncreg(y_obs~x,data=truncation2,
                         point=0,direction="left")
 summary(bhat_correct)
 ```
+\normalsize
 
 ## Achievement Scores: Data Load and Description
 Loading the data using the package [foreign](https://cran.r-project.org/web/packages/foreign/index.html)
@@ -124,7 +123,7 @@ Description of the data from [UCLA Source](https://stats.oarc.ucla.edu/r/dae/tru
 *"A study of students in a special GATE (gifted and talented education) program wishes to model achievement as a function of language skills and the type of program in which the student is currently enrolled. A major concern is that students are required to have a minimum achievement score of 40 to enter the special program. Thus, the sample is truncated at an achievement score of 40."*
 
 ## Achievement Scores: Regular OLS Estimation
-\scriptsize
+\tiny
 ```{r,echo=FALSE}
 bhat_ols = lm(achiv~langscore+prog,data=achievement)
 summary(bhat_ols)
@@ -132,7 +131,7 @@ summary(bhat_ols)
 \normalsize
 
 ## Achievement Scores: Truncated Model
-\scriptsize
+\tiny
 ```{r,echo=FALSE}
 bhat_tr = truncreg(achiv~langscore+prog,data=achievement,
               point=40,direction="left")
@@ -169,22 +168,15 @@ plot(censoring$x,censoring$yreal)
      abline(bhat_censored,col=c("red"))
 ```
 
-## Results: Full Data
-\scriptsize
+## Complete vs. Censored Data with Regular OLS
+\tiny
 ```{r,echo=FALSE}
-summary(bhat_real)
-```
-\normalsize
-
-## Results: Censored Data with Regular OLS
-\scriptsize
-```{r,echo=FALSE}
-summary(bhat_censored)
+stargazer(bhat_real,bhat_censored,type="text",no.space=TRUE)
 ```
 \normalsize
 
 ## Estimation of a Censored Model
-\footnotesize
+\tiny
 ```{r,echo=FALSE}
 b_correct = censReg(y~x,data=censoring)
 summary(b_correct)
@@ -317,36 +309,31 @@ var(blm$totprotests)
 ```
 
 ## Presence of Overdispersion
-The variance is significantly higher than the mean which suggests overdispersion. In a first step, a regular Poisson model is estimated.
+Likely overdispersion due to variance being significantly higher than mean. In a first step, a regular Poisson model is estimated.
 
 ```{r}
 eq1       = "totprotests~log(pop)+log(popdensity)+percentblack+
              blackpovertyrate+I(blackpovertyrate^2)+
              percentbachelor+collegeenrollpc+demshare"
+eq2       = paste(eq1,"+deathsblackpc",sep="")
+eq3       = paste(eq1,"+deathspc",sep="")
 bhat1     = glm(eq1,data=blm,family=poisson)
+bhat2     = glm(eq1,data=blm,family=quasipoisson)
 ```
 
 ## Estimation Results
 \tiny
 ```{r,echo=FALSE}
-summary(bhat1)
+stargazer(bhat1,bhat2,type="text",no.space=TRUE,single.row=TRUE)
 ```
 \normalsize
+Note: Switch of statistical significance for population density 
 
 ## Testing for Overdispersion
 ```{r,echo=FALSE}
 dispersiontest(bhat1)
 ```
 Null hypothesis rejected at 10\% but not 5\% significance level. The Quasi-Poisson Regression Model handles overdispersion by adjusting standard errors but leaving the coefficient estimates the same.
-
-## Estimation Results: Quasipoisson
-\tiny
-```{r,echo=FALSE}
-bhat2 = glm(eq1,data=blm,family=quasipoisson)
-summary(bhat2)
-```
-\normalsize
-Note that in this case, the population density is not statistically significant anymore. 
 
 ## Negative Binomial Regression Model
 The Negative Binomial Regression Model can be used in the presence of count data and overdispersion. Below, the results from the article [Black Lives Matter: Evidence that Police-Caused Deaths Predict Protest Activity](https://doi.org/10.1017/S1537592717004273) are recreated using the negative binomial models presented in the paper. 
@@ -357,32 +344,19 @@ Three models:
 2. Adding black death
 3. Adding all police-caused deaths instead (victims of any race)
 
-## BLM Model I
+## BLM Models
 ```{r}
 bhat3 = glm.nb(eq1,data=blm,link=log)
+bhat4 = glm.nb(eq2,data=blm,link=log)
+bhat5 = glm.nb(eq3,data=blm,link=log)
 ```
 
-## BLM Model II
-```{r}
-bhat4     = glm.nb(totprotests~log(pop)+log(popdensity)+
-                        percentblack+blackpovertyrate+
-                        I(blackpovertyrate^2)+percentbachelor+
-                        collegeenrollpc+demshare+
-                        deathsblackpc,data=blm,link=log)
-```
-
-## BLM Model III
-```{r}
-bhat5     = glm.nb(totprotests~log(pop)+log(popdensity)+
-                        percentblack+blackpovertyrate+
-                        I(blackpovertyrate^2)+percentbachelor+
-                        collegeenrollpc+demshare+
-                        deathspc,data=blm,link=log)
-```
-
+## BLM Model Results
+\tiny
 ```{r,echo=FALSE}
-knitr::knit_exit()
+stargazer(bhat3,bhat4,bhat5,type="text",no.space=TRUE,single.row=TRUE)
 ```
+\normalsize
 
 # Hurdle and Zero-Inflation Models
 ## Overview
@@ -391,7 +365,7 @@ Problem:
 - Presence of many observations at 0 in count data
 - Issues using Poisson or a Negative-Binomial Regression Model. 
 
-Application of hurdle and zero-inflation models:
+Application of hurdle and zero-inflated models:
 
 - Data `NMES1988` from the package [AER](https://cran.r-project.org/web/packages/AER/index.html) 
 - Data BLM protests 
@@ -404,29 +378,131 @@ Application of hurdle and zero-inflation models:
 
 ## Estimation
 ```{r}
-eq        = visits~hospital+health+chronic+gender+school+insurance
-bhat_pois = glm(eq,data=NMES1988,family=poisson)
-bhat_nb   = glm(eq,data=NMES1988)
-bhat_hurdle = hurdle(eq,data=NMES1988,dist="negbin")
+eq             = visits~hospital+health+chronic+gender+
+                  school+insurance
+bhat_pois      = glm(eq,data=NMES1988,family=poisson)
+bhat_nb        = glm(eq,data=NMES1988)
+bhat_hurdle    = hurdle(eq,data=NMES1988,dist="negbin")
+bhat_zi        = zeroinfl(eq,data=NMES1988)
 ```
 
 ## Results
 \tiny
-```{r,warning=FALSE,message=FALSE}
-summary(bhat_pois)
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+stargazer(bhat_pois,bhat_nb,bhat_hurdle,bhat_zi,type="text",no.space=TRUE,omit.stat=c("ll","aic"))
 ```
 \normalsize
 
-## Results
-\tiny
+# Survival Models
+## Overview
+Length of time until a certain event occurs and variables influencing time passed (also known as time-to-event data analysis). Examples:
+
+- Time to failure of mechanical device
+- Time to death after diagnosis with a certain disease
+- Time to re-arrest after release from prison
+- Time to defaulting on loan or mortgage
+
+Data used for this topic
+
+- `rossi`
+
+## Theoretical Aspects
+$T$ as a random variable representing survival time with the cumulative distribution function written as: 
+$$F(t)=Pr(T \leq t)$$
+where $t$ is a realization of $T$. Survival function as the complement probability (at least $t$)  :
+$$S(t)=1-F(t)=Pr(T \geq t)$$
+Hazard function or hazard rate $h(t)$ as risk of failure at time $t$.
+
+## Example Data `rossi`
+Experimental recidivism study on 432 male prisoners over a period of one year after release from prison ([Rossi et al., 1980](https://doi.org/10.1016/C2013-0-11412-2)):
+
+- $week$: Week of first arrest after release
+- $arrest$: Event indicator equal to 1 for rearrest during study period
+- $fin$: Receipt of financial aid after release from prison (randomly assigned factor by the researchers)
+- $age$: Age at the time of release
+- $race$: Black and other
+- $wexp$: Full-time work experience prior to incarceration
+- $mar$: Married at the time of release
+- $paro$: Released on parole
+- $prio$: Number of prior convictions.
+- $educ$: Education coded as 2 (grade 6 or less), 3 (grades 6-9), 4 (grades 10-11), 5 (grade 12), or 6 (some post-secondary).
+
+## Analysis
+Number of prisoners rearrested during study period:
 ```{r}
-summary(bhat_nb)
+sum(rossi$arrest)
+```
+
+Surival object in R created by function `Surv()`:
+```{r,results=FALSE,fig.keep='none'}
+bhatmar = survfit(Surv(week,arrest)~mar,data=rossi)
+bhatfin = survfit(Surv(week,arrest)~fin,data=rossi)
+ggsurvplot(bhatmar,pval=TRUE,risk.table=TRUE)
+ggsurvplot(bhatfin,pval=TRUE,risk.table=TRUE)
+```
+
+## Survival Curve: Marriage
+```{r,echo=FALSE,fig.width=10,fig.height=5}
+ggsurvplot(bhatmar,pval=TRUE,conf.int=TRUE,risk.table=TRUE)
+```
+
+## Survival Curve: Financial Aid
+```{r,echo=FALSE,fig.width=10,fig.height=5}
+ggsurvplot(bhatfin,pval=TRUE,conf.int=TRUE,risk.table=TRUE)
+```
+
+## Cumulative Hazard Function: Marriage
+```{r,echo=FALSE,fig.width=10,fig.height=5}
+ggsurvplot(bhatmar,pval=TRUE,conf.int=TRUE,fun="cumhaz")
+```
+
+## Cumulative Hazard Function: Financial Aid
+```{r,echo=FALSE,fig.width=10,fig.height=5}
+ggsurvplot(bhatfin,pval=TRUE,conf.int=TRUE,fun="cumhaz")
+```
+
+## Cox Regression in R: Setup
+```{r}
+bhat1 = coxph(Surv(week,arrest)~mar,data=rossi)
+bhat2 = coxph(Surv(week,arrest)~mar+fin,data=rossi)
+bhat3 = coxph(Surv(week,arrest)~fin+age+race+wexp+mar+paro+prio,
+              data=rossi)
+```
+
+Statistically insignificant variables excluded from regression output on next slide due to space constraints: $paroyes$, $raceother$, and $wexpyes$
+
+- In general, all variables must be reported! 
+
+## Cox Regression in R: Results
+\tiny
+```{r,echo=FALSE}
+stargazer(bhat1,bhat2,bhat3,type="text",no.space=TRUE,omit=c("paroyes","raceother","wexpyes"))
 ```
 \normalsize
 
-## Results
-\tiny
-```{r}
-summary(bhat_hurdle)
+```{r,echo=FALSE}
+knitr::knit_exit()
 ```
-\normalsize
+
+
+
+## Exercise
+Consider the following data set:
+```{r}
+data(cancer,package="survival")
+```
+A description of the data can be found [here]()
+
+
+
+
+
+```{r}
+res.cox <- coxph(Surv(time, status) ~ age + sex + ph.ecog, data =  lung)
+summary(res.cox)
+```
+
+
+http://www.sthda.com/english/wiki/cox-proportional-hazards-model
+https://bioconnector.github.io/workshops/r-survival.html#survival_curves
+https://rstudio-pubs-static.s3.amazonaws.com/293085_4739f7ad78114ce19330494a57366f86.html
