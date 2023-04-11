@@ -282,7 +282,7 @@ General coefficient interpretation using $\exp(\beta)$, i.e., every unit increas
 - $\beta<0  \Rightarrow \exp(\beta)<1$: Expected count $E(y)$ is $\exp(\beta)$ times smaller than when $X = 0$
 
 ## Testing for Overdispersion I
-Function `overdispersion()` from the package [AER](https://cran.r-project.org/web/packages/AER/index.html):
+Function `dispersiontest()` from the package [AER](https://cran.r-project.org/web/packages/AER/index.html):
 
 - Tests the null hypothesis of equidispersion (i.e., assuming no overdispersion)
 

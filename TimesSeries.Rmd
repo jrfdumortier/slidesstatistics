@@ -1,0 +1,267 @@
+---
+title: "Dynamic Regression Models and Time Series"
+author: "Jerome Dumortier"
+date: "`r format(Sys.time(),'%d %B %Y')`"
+output: 
+     beamer_presentation:
+          theme: "Hannover"
+classoption: "aspectratio=169"
+linkcolor: MidnightBlue
+---
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
+load("G:/My Drive/Teaching/Data Analysis for Public Affairs/GitHub/DataAnalysisPAData.RData")
+library(forecast)
+library(ggplot2)
+library(Hmisc)
+```
+
+# Overview
+
+## Packages
+Required packages:
+
+- [forecast](https://cran.r-project.org/web/packages/forecast/index.html)
+- [Hmisc](https://cran.r-project.org/web/packages/Hmisc/index.html)  
+- [stargazer](https://cran.r-project.org/web/packages/stargazer/index.html)
+
+## Introduction
+Dynamic regression and time series topics:
+
+- Trends and seasonality
+- Distributed-lag models (including past or lagged independent variables), e.g.,
+$$y_t = \alpha+\beta_0 \cdot x_t+\beta_1 \cdot x_{t-1}+\beta_2 \cdot x_{t-2}+\epsilon$$
+- Autoregressive model relating present value of a time series to past values and errors (univariate time series), e.g.,
+$$y_t = \beta_0+\beta_1 \cdot y_{t-1}+\epsilon$$
+- Forecasting
+
+# Trend and Seasonality
+
+## Overview
+Decomposition of data over time into three components:
+
+- Trend
+- Season
+- Random component
+
+Trend
+
+- Linear time trend: $y_t = \beta_0 + \beta_1 \cdot t + \epsilon_t$
+- Exponential time trend: $\ln(y_t) = \beta_0 + \beta_1 \cdot t + \epsilon_t$
+- $\beta_1$ in the exponential time trend model is the average annual growth rate (assuming $t$ is in years)
+
+Inclusion of a seasonal component via (quarterly in this case) dummy variables:
+$$y_t=\beta_0+\delta_1 \cdot Q1_t + \delta_2 \cdot Q2_t +  \delta_3 \cdot Q3_t 
+            + \beta_1 \cdot x_{1,t} + \cdots + \beta_k \cdot x_{k,t} +\epsilon_t$$
+
+## Example using `retail` Data
+Implementation to obtain fitted value:
+```{r}
+retail$date    = as.Date(retail$date,format="%Y-%m-%d")
+retail$month   = months(retail$date)
+retail$trend   = 1:nrow(retail)
+bhat           = lm(retail~factor(month)+trend,data=retail)
+retail$fit     = bhat$fitted.values
+```
+
+## Observed and Fitted `retail` Data
+```{r,echo=FALSE,fig.width=10,fig.height=5}
+ggplot(retail,aes(x=date))+geom_line(aes(y=retail/1000,color="Observed"))+
+     geom_line(aes(y=fit/1000,color="Fitted"))+ylim(0,800)+theme_bw()+
+     theme(axis.title.x=element_blank(),legend.title=element_blank(),legend.position="bottom")+
+     ylab("Retail Sales in Billion USD")
+```
+
+## Decomposition of Time Series
+```{r,fig.width=10,fig.height=4}
+retail  = ts(retail$retail,start=c(1992,1),frequency=12)
+plot(decompose(retail,type=c("additive")))
+```
+
+# Distributed-Lag Models
+
+## Reasons to Include Lags
+Psychological reasons
+
+- Force of habit, e.g., lag in changing consumption habits
+- Uncertainty about permanence of change, e.g., getting a new job but with a probationary period.
+
+Technological or economic reasons
+
+- Difficulty to change practices due to high cost
+
+Institutional reasons
+
+- Contractual obligations that cannot be modified in the short-run
+
+## Relationship between income and consumption
+Assume the following relationship between income and consumption:
+$$C_t = \alpha + \beta_0 \cdot I_t + \beta_1 \cdot I_{t-1} + \beta_2 \cdot I_{t-2}$$
+
+Example: Increase in income from \$4,000 to \$5,000
+
+- Assume that $\alpha_0=100$, $\beta_0 = 0.4$, $\beta_1=0.3$, and $\beta_2 = 0.2$.
+- What is the long-run consumption with \$4,000?
+- How does the consumption change over the time when receiving the increase of \$1,000
+
+Note that $\sum_{i=0}^2  \beta_i = 0.9$
+
+## Long-Run Multiplier
+Distributed-lag models (including pasted or lagged independent variables):
+$$y_t = \alpha+\beta_0 \cdot x_t+\beta_1 \cdot x_{t-1}+\beta_2 \cdot x_{t-2}+ \dots + \beta_k \cdot x_{t-k} + \epsilon$$
+Long-run multiplier (or long-run propensity):
+$$\sum_{i=1}^k \beta_i = \beta_0+\beta_1+\beta_2 + \dots +\beta_k = \beta$$
+
+## Koyck Method for Distributed-Lag Models
+Assumption: All $\beta_k$ are of the same sign, then $\beta_k=\beta_0 \cdot \lambda^k$ for $k=0,1,2,\dots,\infty$. Characteristics of this assumption:
+
+- $\lambda <1$ gives less weight to distant $\beta$s
+- Long-run multiplier is finite, i.e.,
+  $$\sum_{k=0}^\infty \beta_k = \beta_0 \left( \frac{1}{1-\lambda} \right)$$
+
+Regression model equation
+$$y_t=\alpha+\beta_0 \cdot x_t + \beta_0 \cdot \lambda \cdot x_{t-1} + \beta_0 \cdot  \lambda^2 \cdot x_{t-2} + \dots + \epsilon_t$$
+Reformulated equation: $y_t=\alpha \cdot (1-\lambda) + \beta_0 \cdot x_t + \lambda \cdot y_{t-1} + \upsilon$
+
+## Koyck Method for Distributed-Lag Models
+\scriptsize
+```{r,echo=FALSE}
+bhat = lm(formula = consumption ~ income + Lag(consumption), data = usdata)
+summary(bhat)
+```
+\normalsize
+
+# Time Series
+
+## Overview
+Stochastic process:
+
+- Collection of random variables ordered in time
+
+Stationary process: If the time series is not stationary then the analysis cannot be generalized to other time periods.
+
+- Constant mean: $E(y_t) = \mu$
+- Constant variance: $Var(y_t) = \sigma^2$
+- Constant covariance: $\gamma_k = E\left[(y_t-\mu)(y_{t+k}-\mu)\right]$
+
+White noise:
+
+- Purely random stochastic process with mean zero and constant variance.
+
+## Important Characteristics
+Stationarity
+
+- $x_t$ values are drawn from the same distribution
+- Time series with a trend is usually not stationary.
+
+- Autocorrelation
+- Spurious regression
+- Random Walk Phenomenon
+
+## Autoregressive Model of Order 1
+AR(1) Model
+$$y_t = \alpha + \beta y_{t-1} + \epsilon_t$$
+where $\epsilon_t \sim N(0,\sigma^2)$.
+
+
+## Sample Autocorrelation Function (ACF)
+ACF
+
+- Correlations between $x_t$ and $x_{t-1}$, $x_{t-2}$, $x_{t-3}$, and so on.
+- Can be used to identify possible structure of time series
+- Can be used on the actual time series as well as the residuals of any regression
+- Ideally, we do not want to have any significant correlations with any lags.
+
+## Weak Stationarity
+Conditions:
+
+- $E[x_t]$ is constant.
+- $Var(x_t)$ is constant.
+- $Cov(x_t,x_{t+h})$ depends on $h$ but not on $t$.
+
+Consider the AR(1) model
+$$y_t = \alpha + \phi_1 y_{t-1} + \epsilon_t$$
+Requirement for stationary AR(1) is that $|\phi_1|<1$.
+
+## Properties of an AR(1) process
+Mean of $x_t$
+$$\mu = \frac{\alpha}{1-\phi_1}$$
+Variance
+$$Var(x_t) = \frac{\sigma^2_w}{1-\phi_1^2}$$
+Correlation
+$$\rho_h = \phi^h_1$$
+
+## Moving Average Models
+A moving average term in a time series model is a past error (multiplied by a coefficient), e.g., MA(1):
+$$x_t = \mu + w_t + \theta_1 \cdot w_{t-1}$$
+where $w_t \sim N(0,\sigma_w^2)$. The MA(1) model is written as:
+$$x_t = \mu + w_t + \theta_1 \cdot w_{t-1} + \theta_2 \cdot w_{t-2}$$
+Properties of an MA(1) model:
+
+- $E[x_t] = \mu$
+- $Var(x_t) = \sigma^2_w(1+\theta_1^2)$
+- ACF is $\rho_1 = \theta_1/(1+\theta_1^2)$ and $\rho_h = 0$ for $h \geq 2$
+
+## Random Walk
+Let $\epsilon_t$ be white noise then the random walk without drift is
+$$y_t = y_{t-1} + \epsilon_t$$
+This is called an autoregressive model of order 1 or AR(1). Example:
+$$y_1 = y_0 + \epsilon_1$$
+$$y_2 = y_1 + \epsilon_2 = y_0 + \epsilon_1 + \epsilon_2$$
+This is not a stationary process and it can be shown that $E(y_t) = y_0$ and $Var(y_t) = t \cdot \sigma^2$. However
+$$y_t - y_{t-1} = \Delta y_t = \epsilon_t$$
+
+## Random Walk and Autoregressive Models
+Let $\epsilon_t$ be white noise then the random walk with drift is
+$$y_t = c+y_{t-1} + \epsilon_t$$
+where $c$ is the drift parameter. It can be shown that $E(y_t) = y_0 + t \cdot c$ and $Var(y_t) = t \cdot \sigma^2$. An autoregressive model AR(p) can be written as
+$$y_t = c+ \sum^p_{i=1} \phi_p y_{t-p} + \epsilon_t$$
+
+# Forecasting
+
+## Overview
+Autoregressive (AR) process: AR(p)
+$$y_t-\delta=\alpha_1 \cdot(y_{t-1}-\delta)+\alpha_2 \cdot(y_{t-2}-\delta)+\dots+\alpha_p \cdot (y_{t-p}-\delta)+\epsilon_t$$
+Moving average (MA) process: MA(q)
+$$y_t=\mu+\beta_0 \cdot \epsilon_t+\beta_1 \cdot \epsilon_{t-1}+\beta_2 \cdot \epsilon_{t-2}+\dots+\beta_q \cdot \epsilon_{t-q}$$
+Autoregressive and moving average (ARMA) process: ARMA(p,q)
+$$y_t = \theta + \alpha_1 \cdot y_{t-1} + \beta_0 \cdot \epsilon_t + \beta_1 \cdot \epsilon_{t-1}$$
+Autoregressive Integrated Moving Average (ARIMA) Model: ARIMA(p,d,q)
+
+- Correction for non-stationary time series
+
+## Japanese Car Production 1964-1989 
+```{r,echo=FALSE,fig.width=10,fig.height=5}
+jcars     = subset(jcars,year>1963)
+ggplot(jcars,aes(x=year,y=cars/1000))+
+     geom_line()+theme_bw()+theme(axis.title.x=element_blank())+ylim(0,15)+
+     ylab("Vehicles (in Million)")
+```
+
+## Forecasting Procedures
+Model 1: Regular OLS Model
+$$y_t = \beta_0 + \beta_1 \cdot t + \epsilon_t$$
+Model 2: Autoregressive Model
+$$y_t = \beta_0 + \beta_1 \cdot t + n_t \quad \text{where} \quad n_t = \phi_1 \cdot n_{t-1} + \epsilon_t$$
+Note: Production volume after 1963
+
+## Model 1: Regular OLS
+Implementation to obtain fitted value:
+\scriptsize
+```{r}
+summary(lm(cars~year,data=jcars))
+```
+\normalsize
+
+## Model 2: Autoregressive Model
+\scriptsize
+```{r}
+bhat = Arima(jcars$cars,order=c(1,0,0),include.constant=TRUE,include.drift = TRUE)
+summary(bhat)
+```
+\normalsize
+
+## Plot
+```{r,fig.width=10,fig.height=4}
+plot(forecast(bhat))
+```
