@@ -14,6 +14,7 @@ load("G:/My Drive/Teaching/Data Analysis for Public Affairs/GitHub/DataAnalysisP
 library(forecast)
 library(ggplot2)
 library(Hmisc)
+library(stargazer)
 ```
 
 # Overview
@@ -140,72 +141,59 @@ Stochastic process:
 
 Stationary process: If the time series is not stationary then the analysis cannot be generalized to other time periods.
 
-- Constant mean: $E(y_t) = \mu$
-- Constant variance: $Var(y_t) = \sigma^2$
-- Constant covariance: $\gamma_k = E\left[(y_t-\mu)(y_{t+k}-\mu)\right]$
+- Constant mean: $E(y_t)=\mu$
+- Constant variance: $Var(y_t)=\sigma^2$
+- Constant covariance depending on $h$ but not $t$: $\gamma_h=Cov(y_t,y_{t-h})$
 
 White noise:
 
 - Purely random stochastic process with mean zero and constant variance.
 
-## Important Characteristics
-Stationarity
-
-- $x_t$ values are drawn from the same distribution
-- Time series with a trend is usually not stationary.
-
-- Autocorrelation
-- Spurious regression
-- Random Walk Phenomenon
-
-## Autoregressive Model of Order 1
+## Autoregressive Model of Order 1: AR(1)
 AR(1) Model
-$$y_t = \alpha + \beta y_{t-1} + \epsilon_t$$
-where $\epsilon_t \sim N(0,\sigma^2)$.
+$$y_t = \alpha + \phi_1 \cdot y_{t-1} + \epsilon_t$$
+where $\epsilon_t \sim N(0,\sigma^2_{\epsilon})$. Properties of an AR(1) process:
 
+- Mean of $x_t$: $\mu = \frac{\alpha}{1-\phi_1}$
+- Variance: $Var(x_t) = \frac{\sigma^2_{\epsilon}}{1-\phi_1^2}$
+- Correlation: $\rho_h = \phi_1^h$ where $h$ represents the number of periods separating the observations
 
-## Sample Autocorrelation Function (ACF)
-ACF
+Requirement for stationary AR(1) is that $|\phi_1|<1$. Trending time series are usually not stationnary.
 
-- Correlations between $x_t$ and $x_{t-1}$, $x_{t-2}$, $x_{t-3}$, and so on.
-- Can be used to identify possible structure of time series
-- Can be used on the actual time series as well as the residuals of any regression
-- Ideally, we do not want to have any significant correlations with any lags.
+## AR(1) Model: `jcars`
+\tiny
+```{r}
+jcars = subset(jcars,year>1962)
+bhat1 = lm(cars~Lag(cars),data=jcars)
+summary(bhat1)
+```
+\normalsize
 
-## Weak Stationarity
-Conditions:
+## Autocorrelation Function (ACF)
+ACF: Correlation between $x_t$ and $x_{t-1}$, $x_{t-2}$, $x_{t-3}$, and so on.
 
-- $E[x_t]$ is constant.
-- $Var(x_t)$ is constant.
-- $Cov(x_t,x_{t+h})$ depends on $h$ but not on $t$.
+- Identification of possible time series structure using function `acf()`
+- Use on time series and regression residuals
 
-Consider the AR(1) model
-$$y_t = \alpha + \phi_1 y_{t-1} + \epsilon_t$$
-Requirement for stationary AR(1) is that $|\phi_1|<1$.
-
-## Properties of an AR(1) process
-Mean of $x_t$
-$$\mu = \frac{\alpha}{1-\phi_1}$$
-Variance
-$$Var(x_t) = \frac{\sigma^2_w}{1-\phi_1^2}$$
-Correlation
-$$\rho_h = \phi^h_1$$
+```{r,fig.width=10,fig.height=4,echo=FALSE}
+acf(jcars$cars)
+```
 
 ## Moving Average Models
 A moving average term in a time series model is a past error (multiplied by a coefficient), e.g., MA(1):
 $$x_t = \mu + w_t + \theta_1 \cdot w_{t-1}$$
-where $w_t \sim N(0,\sigma_w^2)$. The MA(1) model is written as:
+where $w_t \sim N(0,\sigma_w^2)$. The MA(2) model is written as:
 $$x_t = \mu + w_t + \theta_1 \cdot w_{t-1} + \theta_2 \cdot w_{t-2}$$
 Properties of an MA(1) model:
 
-- $E[x_t] = \mu$
-- $Var(x_t) = \sigma^2_w(1+\theta_1^2)$
+- $E(x_t) = \mu$
+- $Var(x_t) = \sigma^2_w \cdot (1+\theta_1^2)$
 - ACF is $\rho_1 = \theta_1/(1+\theta_1^2)$ and $\rho_h = 0$ for $h \geq 2$
 
 ## Random Walk
 Let $\epsilon_t$ be white noise then the random walk without drift is
 $$y_t = y_{t-1} + \epsilon_t$$
-This is called an autoregressive model of order 1 or AR(1). Example:
+Example:
 $$y_1 = y_0 + \epsilon_1$$
 $$y_2 = y_1 + \epsilon_2 = y_0 + \epsilon_1 + \epsilon_2$$
 This is not a stationary process and it can be shown that $E(y_t) = y_0$ and $Var(y_t) = t \cdot \sigma^2$. However
@@ -213,14 +201,14 @@ $$y_t - y_{t-1} = \Delta y_t = \epsilon_t$$
 
 ## Random Walk and Autoregressive Models
 Let $\epsilon_t$ be white noise then the random walk with drift is
-$$y_t = c+y_{t-1} + \epsilon_t$$
-where $c$ is the drift parameter. It can be shown that $E(y_t) = y_0 + t \cdot c$ and $Var(y_t) = t \cdot \sigma^2$. An autoregressive model AR(p) can be written as
-$$y_t = c+ \sum^p_{i=1} \phi_p y_{t-p} + \epsilon_t$$
+$$y_t=\alpha+y_{t-1}+\epsilon_t$$
+where $\alpha$ is the drift parameter. It can be shown that $E(y_t)=y_0+\alpha \cdot t$ and $Var(y_t) = t \cdot \sigma^2$. An autoregressive model AR(p) can be written as
+$$y_t=\alpha+\sum^p_{i=1} \phi_p \cdot y_{t-p} + \epsilon_t$$
 
 # Forecasting
 
 ## Overview
-Autoregressive (AR) process: AR(p)
+AR(p) with $\delta$ being the mean:
 $$y_t-\delta=\alpha_1 \cdot(y_{t-1}-\delta)+\alpha_2 \cdot(y_{t-2}-\delta)+\dots+\alpha_p \cdot (y_{t-p}-\delta)+\epsilon_t$$
 Moving average (MA) process: MA(q)
 $$y_t=\mu+\beta_0 \cdot \epsilon_t+\beta_1 \cdot \epsilon_{t-1}+\beta_2 \cdot \epsilon_{t-2}+\dots+\beta_q \cdot \epsilon_{t-q}$$
@@ -245,23 +233,29 @@ Model 2: Autoregressive Model
 $$y_t = \beta_0 + \beta_1 \cdot t + n_t \quad \text{where} \quad n_t = \phi_1 \cdot n_{t-1} + \epsilon_t$$
 Note: Production volume after 1963
 
+```{r,results='hide'}
+bhatols   = lm(cars~year,data=jcars)
+bhatarima = Arima(jcars$cars,order=c(1,0,0),
+                  include.constant=TRUE,include.drift=TRUE)
+```
+
+
 ## Model 1: Regular OLS
 Implementation to obtain fitted value:
 \scriptsize
-```{r}
-summary(lm(cars~year,data=jcars))
+```{r,echo=FALSE}
+summary(bhatols)
 ```
 \normalsize
 
 ## Model 2: Autoregressive Model
 \scriptsize
-```{r}
-bhat = Arima(jcars$cars,order=c(1,0,0),include.constant=TRUE,include.drift = TRUE)
-summary(bhat)
+```{r,echo=FALSE}
+summary(bhatarima)
 ```
 \normalsize
 
 ## Plot
 ```{r,fig.width=10,fig.height=4}
-plot(forecast(bhat))
+plot(forecast(bhatarima))
 ```
