@@ -79,7 +79,7 @@ summary(bhat)
 ## Child Mortality: R Analysis
 \footnotesize
 ```{r}
-bhat=lm(CM~PGNP+FLFP,data=childmortality)
+bhat=lm(cm~pgnp+flfp,data=childmortality)
 summary(bhat)
 ```
 \normalsize

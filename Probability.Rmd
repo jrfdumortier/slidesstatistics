@@ -5,7 +5,7 @@ date: "`r format(Sys.time(),'%d %B %Y')`"
 output: 
      beamer_presentation:
           theme: "Hannover"
-classoption: "aspectratio=1610"
+classoption: "aspectratio=169"
 linkcolor: MidnightBlue
 ---
 

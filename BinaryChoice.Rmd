@@ -174,17 +174,17 @@ Food purchases data:
 
 ## Data Preparation and Estimation
 ```{r}
-fpdata$strawberries_org  = ifelse(fpdata$strawberries_org==0,0,1)
-fpdata$tomatoes_org      = ifelse(fpdata$tomatoes_org==0,0,1)
+fpdata$strawberriesorg  = ifelse(fpdata$strawberriesorg==0,0,1)
+fpdata$tomatoesorg      = ifelse(fpdata$tomatoesorg==0,0,1)
 ```
 
 
 ```{r}
-bhats = glm(strawberries_org~age+kidsunder12+rootsurban+
+bhats = glm(strawberriesorg~age+kidsunder12+rootsurban+
             education+income,
             family=binomial(link="logit"),
             data=fpdata)
-bhatt = glm(tomatoes_org~age+kidsunder12+rootsurban+
+bhatt = glm(tomatoesorg~age+kidsunder12+rootsurban+
             education+income,
             family=binomial(link="logit"),
             data=fpdata)

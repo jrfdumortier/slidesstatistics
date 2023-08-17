@@ -82,12 +82,12 @@ Independent variables are
 
 ## Setup and Calculation in R
 ```{r,results=FALSE,warning=FALSE,message=FALSE}
-fpdata$strawberries_org  = as.factor(fpdata$strawberries_org)
-strawdata                = fpdata[c("strawberries_org","age",
+fpdata$strawberriesorg   = as.factor(fpdata$strawberriesorg)
+strawdata                = fpdata[c("strawberriesorg","age",
                                     "education","female",
                                     "kidsunder12")]
 strawdata                = na.omit(strawdata)
-bhat                     = polr(strawberries_org~age+education+
+bhat                     = polr(strawberriesorg~age+education+
                                      female+kidsunder12,
                                 data=strawdata,Hess=TRUE)
 ```

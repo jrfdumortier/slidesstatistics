@@ -5,7 +5,7 @@ date: "`r format(Sys.time(),'%d %B %Y')`"
 output: 
      beamer_presentation:
           theme: "Hannover"
-classoption: "aspectratio=1610"
+classoption: "aspectratio=169"
 linkcolor: MidnightBlue
 ---
 
@@ -235,17 +235,17 @@ Data on vehicle fuel efficiency for all model years (1984--2020) from [DOE and E
 cars2015 = subset(vehicles,year==2015)
 ```
 
-Note that the double equal sign conducts a logical test. To list all EPA vehicle size classes (VClass):
+Note that the double equal sign conducts a logical test. To list all EPA vehicle size classes ($vclass$):
 
 ```{r,results='hide'}
-unique(cars2015$VClass)
+unique(cars2015$vclass)
 ```
 
 Suppose you are only interested in the variables *ghgScore* and *VClass* for the model year 2015.
         
 - `cars2015 = subset(vehicles,year==2015,select=c("ghgScore","VClass"))`
         
-Get glimpse at the results: `table(cars2015$VClass,cars2015$ghgScore)`
+Get glimpse at the results: `table(cars2015$vclass,cars2015$ghgScore)`
 
 ## Basic Handling of Data Frames II
 Suppose you are only interested in *Compact Cars* and *Large Cars* in the column *VClass* for the year 2015. There the notation is a bit odd (note that the many line breaks are not necessary to include in R):
@@ -253,9 +253,9 @@ Suppose you are only interested in *Compact Cars* and *Large Cars* in the column
 ```{r,results='hide'}
 cars2015 = subset(vehicles,
                   year==2015 &
-                  VClass %in% c("Compact Cars",
+                  vclass %in% c("Compact Cars",
                   "Large Cars"),
-                  select=c("make","ghgScore","VClass"))
+                  select=c("make","co2tailpipegpm","vclass"))
 ```
 
 ## Exercises 3
@@ -264,8 +264,8 @@ From the vehicles data set, extract the GHG Score and the vehicle class from the
 ## Aggregating Data and Writing .csv-Files
 To aggregate data based on a function, e.g., sum or mean:
 ```{r}
-cars2015 = aggregate(cars2015$ghgScore,
-                     by=list(cars2015$make,cars2015$VClass),
+cars2015 = aggregate(cars2015$co2tailpipegpm,
+                     by=list(cars2015$make,cars2015$vclass),
                      FUN=mean)
 ```
 
@@ -293,13 +293,13 @@ Compare the outputs of `table()` and `CrossTable()`
 
 ```{r,results='hide'}
 library(gmodels)
-table(gssgun$owngun,gssgun$sex)
-CrossTable(gssgun$owngun,gssgun$sex)
+table(gss$owngun,gss$sex)
+CrossTable(gss$owngun,gss$sex)
 ```
 
 Note that for almost any R command, you can store the output by assigning it a name:
 ```{r,results='hide'}
-output = CrossTable(gssgun$owngun,gssgun$sex)
+output = CrossTable(gss$owngun,gss$sex)
 ```
 
 ## Merging Datasets (`ohioscore` and `ohioincome`)
@@ -310,7 +310,7 @@ Consider two datasets from school districts in Ohio:
         
 One important function to merge datasets in R:
 ```{r}
-ohioschool = merge(ohioscore,ohioincome,by=c("IRN"))
+ohioschool = merge(ohioscore,ohioincome,by=c("irn"))
 rm(ohioscore,ohioincome)
 ```
 

@@ -5,7 +5,7 @@ date: "`r format(Sys.time(),'%d %B %Y')`"
 output: 
      beamer_presentation:
           theme: "Hannover"
-classoption: "aspectratio=1610"
+classoption: "aspectratio=169"
 linkcolor: MidnightBlue
 ---
 
@@ -112,13 +112,17 @@ This gives us the margin of error for the political party affiliation of $0.55 \
 
 ## Confidence Interval for a Proportion: R
 ```{r,results=FALSE}
-nobs = nrow(gss2018)
-meandata = mean(gss2018$vote)
-z = qnorm(0.975)
-stderror = sqrt(meandata*(1-meandata)/nobs)
-CI_lower = meandata-z*stderror
-CI_upper = meandata+z*stderror
-t.test(gss2018$vote)
+gss$vote       = NA
+gss$vote[which(gss$vote12=="voted")]         = 1
+gss$vote[which(gss$vote12=="did not vote")]  = 0
+gss            = subset(gss,vote %in% c(0,1))
+nobs           = nrow(gss)
+meandata       = mean(gss$vote)
+z              = qnorm(0.975)
+stderror       = sqrt(meandata*(1-meandata)/nobs)
+CI_lower       = meandata-z*stderror
+CI_upper       = meandata+z*stderror
+t.test(gss$vote)
 ```
 
 ## Sample Size Calculations

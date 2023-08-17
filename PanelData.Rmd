@@ -199,9 +199,9 @@ stargazer(bhat81,bhat78,type="text",no.space=TRUE,single.row=TRUE)
 
 ## Data `kiel`: Implementation in R
 ```{r}
-bhat1     = lm(rprice~y81+nearinc+y81nrinc,data=kiel)
-bhat2     = lm(rprice~y81+nearinc+y81nrinc+age+agesq,data=kiel)
-bhat3     = lm(rprice~y81+nearinc+y81nrinc+age+agesq+cbd+rooms+
+bhat1     = lm(rprice~y81+nearinc+y81:nearinc,data=kiel)
+bhat2     = lm(rprice~y81+nearinc+y81:nearinc+age+agesq,data=kiel)
+bhat3     = lm(rprice~y81+nearinc+y81:nearinc+age+agesq+cbd+rooms+
                area+land+baths,data=kiel)
 ```
 

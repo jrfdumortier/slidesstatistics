@@ -2,7 +2,11 @@
 title: "Basic Statistics and Sampling"
 author: "Jerome Dumortier"
 date: "`r format(Sys.time(),'%d %B %Y')`"
-output: beamer_presentation
+output: 
+     beamer_presentation:
+          theme: "Hannover"
+classoption: "aspectratio=169"
+linkcolor: MidnightBlue
 ---
 
 ## Lecture Overview

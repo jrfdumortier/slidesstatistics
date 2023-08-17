@@ -2,7 +2,11 @@
 title: "Hypothesis Testing"
 author: "Jerome Dumortier"
 date: "`r format(Sys.time(),'%d %B %Y')`"
-output: beamer_presentation
+output: 
+     beamer_presentation:
+          theme: "Hannover"
+classoption: "aspectratio=169"
+linkcolor: MidnightBlue
 ---
 
 ```{r,echo=FALSE,warning=FALSE,results=FALSE}
@@ -151,13 +155,16 @@ For a two-sided hypothesis test at the $\alpha=0.05$ level, we fail to reject th
 
 ## Hypothesis Test about Population Proportion: Social Media
 ```{r}
-t.test(gsssocialmedia$instagram,mu=0.33)
+gss$instagram    = NA
+gss$instagram[which(gss$instagrm=="no")]     = 0
+gss$instagram[which(gss$instagrm=="yes")]    = 1
+t.test(gss$instagram,mu=0.33,na.action=na.omit)
 ```
 
 ## Hypothesis Test about Population Proportion: Social Media
 ```{r}
-t.test(gsssocialmedia$instagram,mu=0.33,
-       alternative="less")
+t.test(gss$instagram,mu=0.33,
+       alternative="less",na.action=na.omit)
 ```
 
 ## Two Sample Test: Overview
@@ -196,7 +203,7 @@ Then the degrees of freedom are $d.f. = d_1/(d_2+d_3)$.
 ## Two Sample Test (Equal and Unequal Variance): R
 Separating schools into three different income groups
 ```{r,results=FALSE}
-oh   = merge(ohioincome,ohioscore,by="IRN")
+oh   = merge(ohioincome,ohioscore,by="irn")
 oh_s = subset(oh,enrollment<1000)
 oh_l = subset(oh,enrollment>3000)
 oh_m = subset(oh,enrollment>1000 & enrollment <3000)
