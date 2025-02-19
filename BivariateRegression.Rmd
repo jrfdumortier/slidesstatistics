@@ -5,6 +5,8 @@ date: "`r format(Sys.time(),'%d %B %Y')`"
 output: 
      beamer_presentation:
           theme: "Hannover"
+          slide_level: 3
+section-titles: false
 classoption: "aspectratio=169"
 linkcolor: MidnightBlue
 ---
@@ -12,6 +14,29 @@ linkcolor: MidnightBlue
 ```{r,echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
 load("G:/My Drive/Teaching/Data Analysis for Public Affairs/GitHub/DataAnalysisPAData.RData")
 ```
+
+### CLRM: Assumptions
+Required assumptions for unbiasedness coefficient estimates:
+
+- A1: Linear in terms of coefficients, i.e., $y=\beta_0+\beta_1 \cdot x$
+- A2: Zero mean value of error terms $\epsilon$, i.e., $E(\epsilon_i|x_i)=0$
+- A3: Homoscedasticity (equal variance) of $\epsilon_i$, i.e., $Var(\epsilon_i) = \sigma^2$
+- A4: No autocorrelation between the error terms, i.e., $Cov(\epsilon_i,\epsilon_j)=0$
+- A5: No covariance between $\epsilon_i$ and $x_i$
+- A6: Number of observations is greater than number of parameters to be estimated
+- A7: Full rank and absence of (perfect) multicollinearity
+
+### CLRM: Relaxing Assumptions
+Relaxing the assumptions of the classical regression model requires regression diagnostics and/or different regression approaches
+        
+- Multicollinearity: Correlation between independent variables are correlated with each other?
+ 
+     - Beds and bathrooms in a home value model
+     - Multicollinearity occurs between two or more (!) independent variables
+
+- Heteroscedasticity: Errors variance not constant
+- Autocorrelation between error terms
+- Inclusion of irrelevant or exclusion of relevant independent variables
 
 ## Introduction
 General goal of a regression analysis:

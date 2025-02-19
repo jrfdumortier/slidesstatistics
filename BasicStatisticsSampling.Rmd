@@ -5,17 +5,157 @@ date: "`r format(Sys.time(),'%d %B %Y')`"
 output: 
      beamer_presentation:
           theme: "Hannover"
+          slide_level: 3
+section-titles: false
 classoption: "aspectratio=169"
 linkcolor: MidnightBlue
 ---
 
+```{r,echo=FALSE,warning=FALSE,results=FALSE,message=FALSE,error=FALSE}
+load("D:/Teaching/Data Analysis for Public Affairs/GitHub/DataAnalysisPAData.RData")
+library(ggpubr)
+library(ggsci)
+```
+
 ## Lecture Overview
-Topics covered:
+Topics covered
 
-- Law of Large Numbers
-- Central Limit Theorem
+- Sampling
+- Law of large numbers
+- Central limit theorem
 
-## Law of Large Numbers
+# Sampling
+
+## Refresher: Population versus Sample
+Population
+
+- Entire group of individuals or items about which information is needed
+- Characterized by unknown parameters
+
+Sample 
+
+- Subset of the population
+- Application of statistics allows inference on population characteristics
+- Used in (social) science to collect data without surveying entire population
+- Example from natural science: Sampling of a field for soil characteristics 
+
+Importance of sampling
+
+- Reduction in time and resources needed to infer population characteristics
+- Ability of decision-making based on sample data
+
+Sample needs to be correctly taken which is the subject of research method classes
+
+## Sampling Methods
+Probability sampling
+
+- Simple random sampling: Equal chance of each population member to be selected
+- Stratified sampling: Separation of population into subgroups with subsequent sampling from each subgroup (e.g., based on location)
+- Cluster sampling: Separation of population into clusters with subsequent selection of cluster (e.g., [fisheries]( https://doi.org/10.1080/00028487.2014.901252))
+
+Non-probability sampling (Usually biased but useful for exploratory research)
+
+- Convenience sampling: Participants are selected based on availability
+- Quota sampling: Ensures specific characteristics are represented
+
+# Comparison of Sampling Methods
+## Exempt Organizations: Setup
+Focus on the mean income of nonprofit organizations
+
+```{r}
+eo        = exemptorgs[c("name","income","ntee")]
+eo        = na.omit(eo)
+n         = 50 # Sample size
+meaninc   = mean(eo$income)
+```
+
+Mean (population) income `r sprintf("$%s",format(meaninc,big.mark=",",nsmall=0))`
+
+## Simple Random Sampling
+Each individual has an equal chance of being selected
+
+```{r}
+simplerandom   = sample(eo$income,n,replace=FALSE)
+meaninc        = mean(simplerandom)
+```
+
+Mean sample income `r sprintf("$%s",format(meaninc,big.mark=",",nsmall=0))`
+
+## Systematic Sampling
+Systematic sampling involves selecting every nth individual from a list after a random start point
+
+```{r}
+# Define a population and sample size
+interval            = round(length(eo$income)/n)
+start               = sample(1:interval,1)
+systematicsample    = eo$income[seq(start,length(eo$income),
+                                    by=interval)]
+meaninc             = mean(systematicsample)
+```
+
+Mean sample income `r sprintf("$%s",format(meaninc,big.mark=",",nsmall=0))`
+
+## Stratified Sampling by NTEE
+```{r}
+nteecodes = data.frame(code=c("A","B","N"),
+                       description=c("Arts, Culture, and Humanities",
+                                     "Education",
+                                     "Recreation and Sports"))
+for(i in 1:nrow(nteecodes)){
+     df                  = subset(eo,ntee==nteecodes$code[i])
+     df                  = sample(df$income,n,replace=FALSE)
+     nteecodes$mean[i]   = sprintf("$%s",format(mean(df),
+                                                big.mark=",",
+                                                nsmall=0))}
+```
+
+## Convenience Sampling
+Participants are chosen based on availability. In this example, we select the first 50 individuals from the data frame.
+
+```{r}
+# Take the first 50 individuals as a convenience sample
+conveniencesample   = head(eo$income,50)
+meaninc             = mean(conveniencesample)
+```
+
+Mean sample income `r sprintf("$%s",format(meaninc,big.mark=",",nsmall=0))`
+
+# More on Sampling
+## Problems with Sampling
+Sampling Bias
+
+- Selection bias: When sample selection leads to overrepresentation of particular groups
+- Non-response bias: Results when certain respondents do not participate (i.e., respondents with similar characteristics)
+
+Sampling errors vs. non-sampling errors
+
+- Sampling error: The difference between the sample estimate and the true population parameter
+- Non-sampling error: Errors not related to the sampling process such as measurement errors
+
+## Sample Size and Representativeness
+Importance of sample size
+
+- Larger samples provide more precise estimates
+- Reduction in the so-called margin of error
+
+Representativeness of a sample
+
+- Stratified sampling often ensures diverse representation
+- Randomization helps avoid selection bias
+- Example: Representative sample of registered voters
+
+## Basic Calculations in Sampling
+Point Estimates
+
+- Sample mean, median, and proportions are common estimates used in public policy analysis
+- Allows approximation of population parameters from sample data
+
+Confidence Intervals
+
+- Confidence interval (CI): Range within which a population parameter is estimated to be in
+
+# Law of Large Numbers
+## Overview
 Measuring unemployment rate in the United States:
 
 - Current Population Survey (CPS)
@@ -35,7 +175,7 @@ Example of flipping a coin:
 Difficulty to predict the share of heads from a single coin flip but high prediction precision from several thousand flips.
 
 ## Law of Large Numbers: Flipping a Coin
-```{r, echo=FALSE,warning=FALSE}
+```{r, echo=FALSE,warning=FALSE,fig.width=5,fig.height=3}
 library(ggplot2)
 n   = 1000
 x   = sample(0:1,n,repl=T)
@@ -46,7 +186,7 @@ ggplot(lln,aes(x=trials,y=heads))+geom_line()+theme_bw()+ylab("Share of Heads")+
 rm(n,x,s,r,lln)
 ```
 
-## Refresher: Sample versus Population
+## Sample versus Population
 Why sampling is necessary:
 
 - Sampling the entire population may be expensive or impossible.
@@ -60,7 +200,7 @@ Example for polling before an election:
 
 - Every person with voting rights is in the sample frame and has the same chance of getting selected by a news agency for polling.
 
-## Estimation of the Sample Mean and the Sample Variance
+## Sample Mean and the Sample Variance
 Estimation of the population mean based on a sample:
 $$\bar{x} = \frac{1}{N} \sum^{N}_{i=1} x_i$$
 Estimation of the population variance based on a sample:
@@ -82,7 +222,7 @@ Sampling:
 - Repeating the sampling 1000 times
 
 ## Illustration: Estimating the Population Variance II
-```{r,echo=FALSE}
+```{r,echo=FALSE,fig.width=5,fig.height=3}
 pop       = rnorm(100000,mean=50,sd=20)
 n_nminus1 = matrix(0,1000,2)
 out       = matrix(0,50,2)
@@ -102,7 +242,7 @@ ggplot(out,aes(x=Sample,y=Estimate,color=Method))+geom_line(aes(color=Method))+t
 rm(n_nminus1,out,out1,out2,i,j,pop,temp)
 ```
 
-
+# Central Limit Theorem
 ## Sampling Distribution and Central Limit Theorem
 A statistic is a random variable (with its own probability distribution) based on a sample. For example, repeated polling of 1,000 people about their political preferences will result in a different outcome each time. For the sampling distribution of the mean $\bar{x}$, we have the following:
 
@@ -115,7 +255,7 @@ Central Limit Theorem
 - Independent of the underlying distribution, as the sample size increases, the sampling distribution of the mean will follow a normal distribution.
 
 ## Central Limit Theorem: Illustration
-```{r,echo=FALSE}
+```{r,echo=FALSE,fig.width=5,fig.height=3}
 pop_n               = 10000
 sample_n            = 500
 pop_uniform         = runif(pop_n,min=0,max=1)
@@ -164,8 +304,9 @@ Simulation
 4. Generate histogram
 
 ## Insurance Market
-```{r,echo=FALSE}
-ndraws    = 1000;
+
+```{r,echo=FALSE,fig.width=5,fig.height=3}
+ndraws         = 1000;
 fireinsurance  = function(ninsur){
      fire = matrix(0,ndraws,1)
           for (i in 1:ndraws){
@@ -173,20 +314,31 @@ fireinsurance  = function(ninsur){
                fg      <- sum(fg)/ninsur
                fire[i] <- fg}
                return(fire)}
-fire1     = fireinsurance(1000)
-fire2     = fireinsurance(10000)
-fire3     = fireinsurance(25000)
-fire4     = fireinsurance(100000)
-par(mfrow=c(2,2))
-hist(fire1,xlim=c(0,0.025),ylim=c(0,750),main="1000 People Insured",xlab="",
-          breaks=seq(0,0.03,0.001))
-     hist(fire2,xlim=c(0,0.025),ylim=c(0,750),main="10000 People Insured",xlab="",
-          breaks=seq(0,0.03,0.001))
-     hist(fire3,xlim=c(0,0.025),ylim=c(0,750),main="25000 People Insured",xlab="",
-          breaks=seq(0,0.03,0.001))
-     hist(fire4,xlim=c(0,0.025),ylim=c(0,750),main="100000 People Insured",xlab="",
-          breaks=seq(0,0.03,0.001))
+fire1     = data.frame(value=fireinsurance(1000),item="1000 People Insured")
+fire2     = data.frame(value=fireinsurance(10000),item="10000 People Insured")
+fire3     = data.frame(value=fireinsurance(25000),item="25,000 People Insured")
+fire4     = data.frame(value=fireinsurance(100000),item="100,000 People Insured")
+fire      = rbind(fire1,fire2,fire3,fire4)
+ggdensity(fire,x="value",color="item",fill="item",palette="jco")
 ```
 
+## Sampling Variance
+Sampling Variance is the variability in a sample statistic (e.g., sample mean) across different samples drawn from the same population.
 
+- Reflection of the spread of sample estimates around the population parameter
+- Lower variance indicates a more stable estimate, while higher variance suggests more fluctuation between samples.
+- Key in determining the margin of error and confidence intervals
+
+## Factors Influencing Sampling Variance
+Sample Size and Sampling Variance
+
+- **Larger samples** generally have lower sampling variance, resulting in more precise estimates.
+- **Smaller samples** tend to have higher variance, making estimates less reliable.
+
+Population Variability
+- If the population itself has high variability, samples will also exhibit higher sampling variance.
+- Lower population variability translates to lower sampling variance, even with smaller samples.
+
+A larger sample size reduces sampling variance, leading to smaller confidence intervals
+This reduction follows the Law of Large Numbers, which states that as sample size increases, the sample mean approaches the population mean.
 

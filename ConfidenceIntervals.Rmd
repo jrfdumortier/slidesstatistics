@@ -5,6 +5,8 @@ date: "`r format(Sys.time(),'%d %B %Y')`"
 output: 
      beamer_presentation:
           theme: "Hannover"
+          slide_level: 3
+section-titles: false
 classoption: "aspectratio=169"
 linkcolor: MidnightBlue
 ---
@@ -124,6 +126,9 @@ CI_lower       = meandata-z*stderror
 CI_upper       = meandata+z*stderror
 t.test(gss$vote)
 ```
+
+## Illustration
+
 
 ## Sample Size Calculations
 Recall from the confidence interval that

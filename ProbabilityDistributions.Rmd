@@ -5,57 +5,67 @@ date: "`r format(Sys.time(),'%d %B %Y')`"
 output: 
      beamer_presentation:
           theme: "Hannover"
+          slide_level: 3
+section-titles: false
 classoption: "aspectratio=169"
 linkcolor: MidnightBlue
 ---
 
 ## Lecture Overview
-Random variables:
+Random variables
 
 - Probability distributions
 - Expected value (mean) and variance
 
-Discrete distributions:
+Discrete distributions
 
 - Bernoulli
 - Binomial
 - Poisson
 
-Continuous distributions:
+Continuous distributions
 
 - Uniform
 - Normal
 - *t*/Student
 
-## Random Variables
-A random variable is a variable whose value depends on chance:
+# Random Variables
+## Overview
+A random variable is a variable whose value depends on chance
 
 - Number of heads from flipping a coin 20 times
 - Number after rolling a die
 - Number of passengers showing up to a flight
 
-Discrete random variables:
+Discrete random variables
 
 - A random variable $X$ is discrete if it can assume only a finite or countable infinite number of distinct values
 
-Continuous random variables:
+Continuous random variables
 
 - Can take an infinite number of values
 
 ## Discrete versus continuous random variables
-Discrete random variables:
+Discrete random variables
 
 - Number of students in a class
 - Number of children in a family
 - Number of calls to a 911 dispatcher within a 24 hour period
 
-Continuous random variables:
+Continuous random variables
 
 - Temperature in a week from today
 - Value of the S&P 500
 - Average height of IUPUI students
 
 It is sometimes easier to assume continuity even if the variable seems discrete, e.g., home values in Indianapolis.
+
+## Examples of Random Variables
+Simulate rolling a die 600 times and the random variable being the number of sixes.
+```{r}
+dierolls = sample(1:6,size=600,replace=TRUE)
+table(dierolls)
+```
 
 ## Random Variables and Probability Distribution
 A probability distribution is a combination of outcomes of a random variable and associated probabilities. For example, let the random variable $X$ be the number of heads from flipping a coin seven times:
@@ -66,14 +76,15 @@ A probability distribution is a combination of outcomes of a random variable and
      
 The sum of all the probabilities associated with the mutually exclusive outcomes is equal to 1.
 
-## Expected Value and Variance: Definition
+# Expected Value and Variance
+## Definition
 Think of the expected value as a weighted average. If $X$ is a discrete random variable then the expected value of $X$, i.e., $E(X)$, is written as
 $$E(X)=\sum_i x_i \cdot Pr(X=x_i)$$
 If $X$ is a continuous random variable, then calculus is needed to calculate the expected value and those details are in the lecture notes. The variance can be calculated as follows:
 $$ Var(X) = E(X-E(X))^2 = E(X^2)-E(X)^2$$
 Both equations give you the variance. Sometimes one of the equations is more convenient to use. Note that $E(X^2) \neq E(X)^2$.
 
-## Expected Value and Variance: Example Setup
+## Example Setup
 Suppose you are working for a car dealership. For the last year, you calculated
 the number of cars sold per day and came up with the following probability
 distribution:
@@ -82,7 +93,7 @@ distribution:
 |---------|:-----:|:----:|:----:|:----:|:----:|:----:|
 | $Pr(X)$ | 0.10  | 0.15 | 0.15 | 0.30 | 0.25 | 0.05 |
 
-## Expected Value and Variance: Example Calculations
+## Example Calculations
      
 | $x_i$ | $Pr(x_i)$ | $x_i \cdot Pr(x_i)$ | $x_i-\mu$ | $(x_i-\mu)^2$ | $Pr(x_i) \cdot (x_i-\mu)^2$ |
 |:-----:|:---------:|:-------------------:|:---------:|:------------:|:--------------------------:|
@@ -96,6 +107,7 @@ distribution:
 
 Hence $Var(X)=1.94$ and $\sigma=\sqrt{1.94} = 1.393$.
 
+# Discrete Probability Distributions
 ## Bernoulli Distribution
 Characteristics of the Bernoulli distribution:
      
@@ -107,7 +119,42 @@ Probability mass function:
 $$Pr(X=1)=p$$
 And thus we also have $Pr(X=0)=1-p$.
 
-## Binomial Distribution
+## Geometric Distribution: Definition
+The geometric distribution models the number of trials until the first success in a series of Bernoulli trials.
+
+- How many trials are needed to get the first success?
+- Each trial has two outcomes: "Success" (with probability $p$) or "Failure" (with probability $1-p$).
+- The trials are independent and thus, probability of success remains constant across trials.
+
+Mathematical equation:
+$$P(X = k) = (1 - p)^{k - 1} \cdot p$$
+
+where $X$ is the number of trials until the first success, $p$ is the probability of success on each trial, and $k$ is the trial number where the first success occurs.
+
+## Geometric Distribution: Example
+Assume $p=0.2$, the we have the following:
+$$P(X=3)=(1-0.2)^{3-1} \cdot 0.2=(0.8)^2 \cdot 0.2=0.128$$
+
+There is a 12.8% chance the first success occurs on the third trial. Expected value (i.e., average number of trials needed to get the first success) and variance: 
+$$E(X) = \frac{1}{p}$$
+$$Var(X) = \frac{1 - p}{p^2}$$
+
+## Geometric Distribution: R
+If $p=0.2$, then we have the following: 
+$$E(X)=\frac{1}{0.2}= 5$$
+On average, 5 trials for the first success. 
+
+```{r}
+geometrictrials = rgeom(100,prob=0.2)
+```
+
+## Geometric Distribution: Histogram
+```{r,fig.dim=c(4,3)}
+hist(geometrictrials,main="Geometric Distribution (First Success)",
+     xlab="Number of Attempts",breaks=10)
+```
+
+## Binomial Distribution: Definition
 Characteristics of the Binomial distribution:
      
 - Closely related to the Bernoulli Distribution
@@ -119,7 +166,7 @@ Probability mass function:
 $$Pr(X=k) = {n \choose k} \cdot p^k  \cdot (1-p)^{n-k}$$
 The mean is $\mu=n \cdot p$.
 
-## Binomial Distribution
+## Binomial: Use
 When is the Binomial Distribution appropriate? A situation must meet the following conditions for a random variable X to have a binomial distribution:
      
 - You have a fixed number of trials involving a random process; let n be the number of trials.
@@ -127,7 +174,7 @@ When is the Binomial Distribution appropriate? A situation must meet the followi
 - The probability of success is the same for each trial. Let $p$ be the probability of success, which means $1-p$ is the probability of failure.
 - The trials are independent, meaning the outcome of one trial does not influence the outcome of any other trial.
 
-## Binomial Distribution: Example I
+## Binomial: Example I
 Suppose you didn't study for a multiple choice exam. There are 10 questions with five possible answers each. Only one answer per question is correct. What is the probability that you get 6 correct answers?
 $$Pr(X=k) = \frac{10!}{6! \cdot (10-6)!} \cdot 0.2^6  \cdot (1-0.2)^{10-6}$$
 Or simply in R:
@@ -135,7 +182,7 @@ Or simply in R:
 dbinom(6,10,0.2)
 ```
 
-## Binomial Distribution in R: Probability Density Function
+## Binomial in R: Probability Density Function
 The probability density function (PDF) for the binomial distribution in R is written as `dbinom(x,n,p)`. Consider the following probabilities:
 
 - Probability of 9 heads ($x=9$) from 16 coin flips ($n=16$) 
@@ -146,7 +193,7 @@ dbinom(9,16,0.5)
 dbinom(0:16,16,0.5)
 ```
 
-## Binomial Distribution in R: Cumulative density function
+## Binomial in R: Cumulative density function
 The cumulative density function (CDF) for the binomial distribution in R is written as `pbinom(x,n,p)`. Consider the following probabilities:
 
 - Probability of getting up to three heads from flipping a coin ten times
@@ -157,7 +204,7 @@ pbinom(3,10,0.5)
 pbinom(0:10,10,0.5)
 ```
 
-## Binomial Distribution: Example II
+## Binomial: Example II
 Suppose that 85% of Hoosiers are wearing a seat belt. You are a police officer and pulling over 20 cars. What is the probability that at least (!) 15 people are wearing a seat belt?
 
 ```{r}
@@ -166,10 +213,10 @@ Suppose that 85% of Hoosiers are wearing a seat belt. You are a police officer a
 
 While using the binomial distribution, be very careful on how to interpret the results. The probability of at least 15 people wearing a seatbelt means that you are interested in the cumulative probability of 15, 16, 17, 18, 19, and 20 people wearing a seat belt. That probability is 0.933.
 
-## Binomial Distribution: Example III
+## Binomial: Overbooking Flights I
 The binomial distribution can be used to analyze the issue of overbooking. Assume that an airline as a plane with a seating capacity of 115. The ticket price for each traveler is \$400. The airline can overbook the flight, i.e., selling more than 115 tickets, but has to pay \$700 in case a person has a valid ticket but needs to be re-booked to another flight. There is a probability of 10% that a booked passenger does not show up. The results for overbooking between 0 and 30 seats are shown on the next slide.
 
-## Binomial Distribution: Example III (continued)
+## Binomial: Overbooking Flights II
 ```{r,echo=FALSE,warning=FALSE,fig.dim=c(5,3)}
 library(ggplot2)
 seats               = 115

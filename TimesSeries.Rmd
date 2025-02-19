@@ -5,12 +5,14 @@ date: "`r format(Sys.time(),'%d %B %Y')`"
 output: 
      beamer_presentation:
           theme: "Hannover"
+          slide_level: 3
+section-titles: false
 classoption: "aspectratio=169"
 linkcolor: MidnightBlue
 ---
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
-load("G:/My Drive/Teaching/Data Analysis for Public Affairs/GitHub/DataAnalysisPAData.RData")
+load("D:/Teaching/Data Analysis for Public Affairs/GitHub/DataAnalysisPAData.RData")
 library(forecast)
 library(ggplot2)
 library(Hmisc)

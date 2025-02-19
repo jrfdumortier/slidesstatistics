@@ -5,6 +5,8 @@ date: "`r format(Sys.time(),'%d %B %Y')`"
 output: 
      beamer_presentation:
           theme: "Hannover"
+          slide_level: 3
+section-titles: false
 classoption: "aspectratio=169"
 linkcolor: MidnightBlue
 ---
@@ -116,7 +118,7 @@ Quantitative variables can be either:
 ## Levels of Variable Measurements
 Nominal:
 
-- Categories, e.g., eye color, gender, religious affiliation, mode of transportation to O'Neill IUPUI
+- Categories, e.g., eye color, gender, religious affiliation, mode of transportation to O'Neill IU Indianapolis
 - No natural ordering
 
 Ordinal:

@@ -5,6 +5,8 @@ date: "`r format(Sys.time(),'%d %B %Y')`"
 output: 
      beamer_presentation:
           theme: "Hannover"
+          slide_level: 3
+section-titles: false
 classoption: "aspectratio=169"
 linkcolor: MidnightBlue
 ---
@@ -101,7 +103,7 @@ $$A \cup B =\{\text{faulty breaks and/or bad tires}\}$$
 Let $P(A)=0.23$, $P(B)=0.24$, and $P(A \cap B)=0.09$. Thus, we can determine that $P(A \cup B)=0.23+0.24-0.09=0.38$.
 
 ## On-time arrival of airplanes
-If the events are mutually exclusive, the term $P(A \cap B)$ is equal to 0. Gate arrival of airplanes during a week at a mid-sized airport. Everyting not within +/- 10 minutes is considered ``Not on Time.''
+If the events are mutually exclusive, the term $P(A \cap B)$ is equal to 0. Gate arrival of airplanes during a week at a mid-sized airport. Everything not within +/- 10 minutes is considered ``Not on Time.''
 
 | Arrival                    | Event | Flights | Probability |
 |:---------------------------|:-----:|:-------:|:-----------:|
