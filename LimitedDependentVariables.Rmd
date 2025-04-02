@@ -12,7 +12,7 @@ linkcolor: MidnightBlue
 ---
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
-load("G:/My Drive/Teaching/Data Analysis for Public Affairs/GitHub/DataAnalysisPAData.RData")
+load("D:/Teaching/Data Analysis for Public Affairs/Data/DataAnalysisPAData.RData")
 library(AER)
 library(censReg)
 library(foreign)
@@ -26,7 +26,7 @@ library(vcdExtra)
 ```
 
 # Overview
-## Packages and Files
+### Packages and Files
 Required packages:
         
 - [AER](https://cran.r-project.org/web/packages/AER/index.html)
@@ -44,7 +44,7 @@ Required files:
 data("NMES1988",package="AER")
 ```
 
-## Topics Covered
+### Topics Covered
 Regression models in which the dependent variable is somehow limited:
 
 - Truncated data: Values above and/or below particular points are not reported
@@ -53,7 +53,7 @@ Regression models in which the dependent variable is somehow limited:
 - Survival/duration data: Time to a certain event 
 
 # Truncation
-## Overview
+### Overview
 Concept
 
 - Value above and/or below a certain point are not part of the data 
@@ -71,22 +71,22 @@ Simulated data
 
 Next slide: The green regression line is "correct" whereas the "red" is the line obtained from a regression model which ignores the truncation.  
 
-## Graphical Illustration 
+### Graphical Illustration 
 ```{r,echo=FALSE,fig.width=10,fig.height=5}
-bhat_real           = lm(y_real~x,data=truncation)
-bhat_truncated      = lm(y_obs~x,data=truncation)
-plot(truncation$x,truncation$y_obs,xlim=c(0,10),ylim=c(-3,5),pch=19,ylab="y",xlab="x")
-     points(truncation$x,truncation$y_real)
+bhat_real           = lm(yreal~x,data=truncation)
+bhat_truncated      = lm(yobs~x,data=truncation)
+plot(truncation$x,truncation$yreal,pch=1,ylab="y",xlab="x")
+points(truncation$x,truncation$yobs,pch=19)
      abline(bhat_real,col=c("darkgreen"))
      abline(bhat_truncated,col=c("red"))
 ```
 
-## Setup for `truncation` Data
+### Setup for `truncation` Data
 ```{r}
-truncation1    = truncation[c("y_real","x")]
-truncation2    = subset(truncation,y_obs>0,select=c("y_obs","x"))
-bhat_real      = lm(y_real~x,data=truncation1)
-bhat_truncated = lm(y_obs~x,data=truncation2)
+truncation1    = truncation[c("yreal","x")]
+truncation2    = subset(truncation,yobs>0,select=c("yobs","x"))
+bhat_real      = lm(yreal~x,data=truncation1)
+bhat_truncated = lm(yobs~x,data=truncation2)
 ```
 
 Required package to estimate a truncated model
@@ -97,23 +97,23 @@ Additional variable output $sigma$:
 
 - Related to the truncated normal distribution
 
-## Complete vs. Truncated Data with Regular OLS
+### Complete vs. Truncated Data with Regular OLS
 \tiny
 ```{r,echo=FALSE}
 stargazer(bhat_real,bhat_truncated,type="text",no.space=TRUE)
 ```
 \normalsize 
 
-## Results: Correcting for Truncation
+### Results: Correcting for Truncation
 \tiny
 ```{r,echo=FALSE}
-bhat_correct = truncreg(y_obs~x,data=truncation2,
+bhat_correct = truncreg(yobs~x,data=truncation2,
                         point=0,direction="left")
 summary(bhat_correct)
 ```
 \normalsize
 
-## Achievement Scores: Data Load and Description
+### Achievement Scores: Data Load and Description
 Loading the data using the package [foreign](https://cran.r-project.org/web/packages/foreign/index.html)
 ```{r}
 url         = "https://stats.idre.ucla.edu/stat/data/truncreg.dta"
@@ -124,7 +124,7 @@ Description of the data from [UCLA Source](https://stats.oarc.ucla.edu/r/dae/tru
 
 *"A study of students in a special GATE (gifted and talented education) program wishes to model achievement as a function of language skills and the type of program in which the student is currently enrolled. A major concern is that students are required to have a minimum achievement score of 40 to enter the special program. Thus, the sample is truncated at an achievement score of 40."*
 
-## Achievement Scores: Regular OLS Estimation
+### Achievement Scores: Regular OLS Estimation
 \tiny
 ```{r,echo=FALSE}
 bhat_ols = lm(achiv~langscore+prog,data=achievement)
@@ -132,7 +132,7 @@ summary(bhat_ols)
 ```
 \normalsize
 
-## Achievement Scores: Truncated Model
+### Achievement Scores: Truncated Model
 \tiny
 ```{r,echo=FALSE}
 bhat_tr = truncreg(achiv~langscore+prog,data=achievement,
@@ -142,7 +142,7 @@ summary(bhat_tr)
 \normalsize
 
 # Censoring
-## Overview
+### Overview
 Concept
 
 - Value above and/or below a certain point are not part of the data 
@@ -160,7 +160,7 @@ Simulated data
 
 R package [censReg](https://cran.r-project.org/web/packages/censReg/index.html) to reduce bias
 
-## Graphical Illustration
+### Graphical Illustration
 ```{r,echo=FALSE,fig.width=10,fig.height=5}
 bhat_real = lm(yreal~x,data=censoring)
 bhat_censored = lm(y~x,data=censoring)
@@ -170,14 +170,14 @@ plot(censoring$x,censoring$yreal)
      abline(bhat_censored,col=c("red"))
 ```
 
-## Complete vs. Censored Data with Regular OLS
+### Complete vs. Censored Data with Regular OLS
 \tiny
 ```{r,echo=FALSE}
 stargazer(bhat_real,bhat_censored,type="text",no.space=TRUE)
 ```
 \normalsize
 
-## Estimation of a Censored Model
+### Estimation of a Censored Model
 \tiny
 ```{r,echo=FALSE}
 b_correct = censReg(y~x,data=censoring)
@@ -186,7 +186,7 @@ summary(b_correct)
 \normalsize
 
 # Count Models
-## Overview
+### Overview
 Dependent variable
 
 - Discrete, integer count data
@@ -207,10 +207,10 @@ Choice criteria: Presence or absence of overdispersion
 - Overdispersion Variance of the dependent variable is larger than its mean.
 - Poisson model is not suitable for overdispersion
 
-## Packages
+### Packages
 The main package used is [pscl](https://cran.r-project.org/web/packages/pscl/index.html). There is also an additional resource with more theoretical details on the topic: [Regression Models for Count Data in R](http://dx.doi.org/10.18637/jss.v027.i08). A more up-to-date version of the document may be found with the [pscl](https://cran.r-project.org/web/packages/pscl/index.html) package documentation. 
 
-## Poisson Regression Model
+### Poisson Regression Model
 Recall Poisson distribution:
 $$Pr(Y=k)=\frac{e^{-\lambda} \cdot \lambda^k}{k!}$$
 Equidispersion as key characteristics:
@@ -218,10 +218,10 @@ Equidispersion as key characteristics:
 - Mean and variance equal to $\lambda$, i.e., $E(Y)=\lambda$ and $Var(Y)=\lambda$
 - Poisson regression: $\lambda=exp(\beta_0+\beta_1 \cdot x_1+ \dots + \beta_k \cdot x_k)$.
 
-## NHTS Example: Number of Vehicles (`hhpub`)
+### NHTS Example: Number of Vehicles (`hhpub`)
 Data source
 
-- 2017 [National Household Travel Survey](https://nhts.ornl.gov/) 
+- 2022 [National Household Travel Survey](https://nhts.ornl.gov/) 
 - Survey quantifying trip and travel habits across the United States
 - Example use: Quantifying intra-day electricity demand from electric vehicles
 
@@ -234,43 +234,43 @@ Data preparation
 - Elimination of missing and unknown data value
 - Conversion of income to 1,000 dollars
 
-## Data Preparation
+### Data Preparation
 ```{r poissonregression_cleanhhpub,results=FALSE}
-hhpubdata           = subset(hhpub,HHFAMINC %in% c(1:11) & 
-                                   HOMEOWN %in% c(1,2) & 
-                                   URBRUR %in% c(1,2) & 
-                                   HHVEHCNT %in% c(0:12))
-HHFAMINC            = c(1:11)
-INCOME              = c(10,12.5,20,30,42.5,57.5,82.5,112.5,137.5,
+hhpubdata           = subset(nhtshh,hhfaminc %in% c(1:11) & 
+                                   homeown %in% c(1,2) & 
+                                   urbrur %in% c(1,2) & 
+                                   hhvehcnt %in% c(0:12))
+hhfaminc            = c(1:11)
+income              = c(10,12.5,20,30,42.5,57.5,82.5,112.5,137.5,
                         175,200)
-INCOME              = data.frame(HHFAMINC,INCOME)
-hhpubdata           = merge(hhpubdata,INCOME)
-hhpubdata$RURAL     = hhpubdata$URBRUR-1
-hhpubdata$RENT      = hhpubdata$HOMEOWN-1
+income              = data.frame(hhfaminc,income)
+hhpubdata           = merge(hhpubdata,income)
+hhpubdata$rural     = hhpubdata$urbrur-1
+hhpubdata$rent      = hhpubdata$homeown-1
 ```
 
-## Poisson Model Execution
+### Poisson Model Execution
 Preliminary step: Calculation of mean and variance of dependent variable
 ```{r}
-mean(hhpubdata$HHVEHCNT)
-var(hhpubdata$HHVEHCNT)
+mean(hhpubdata$hhvehcnt)
+var(hhpubdata$hhvehcnt)
 ```
 
 Similar values and thus, Poisson regression model as an appropriate first step. 
 
 ```{r}
-bhat_pois = glm(HHVEHCNT~INCOME+RENT+RURAL,
+bhat_pois = glm(hhvehcnt~income+rent+rural,
                 data=hhpubdata,family=poisson)
 ```
 
-## Results
+### Results
 \tiny
 ```{r,echo=FALSE}
 summary(bhat_pois)
 ```
 \normalsize
 
-## Interpretation
+### Interpretation
 Sign of coefficients as an indication of the direction of influence on the outcome variable, i.e., the number of cars. 
 
 - Association of higher income and rural living with a higher number of car
@@ -283,21 +283,21 @@ General coefficient interpretation using $\exp(\beta)$, i.e., every unit increas
 - $\beta>0 \Rightarrow \exp(\beta)>1$: Expected count $E(y)$ is $\exp(\beta)$ times larger than when $X = 0$
 - $\beta<0  \Rightarrow \exp(\beta)<1$: Expected count $E(y)$ is $\exp(\beta)$ times smaller than when $X = 0$
 
-## Testing for Overdispersion I
+### Testing for Overdispersion I
 Function `dispersiontest()` from the package [AER](https://cran.r-project.org/web/packages/AER/index.html):
 
 - Tests the null hypothesis of equidispersion (i.e., assuming no overdispersion)
 
 Executed after the main regression using `glm(...,family=poisson)` 
 
-## Testing for Overdispersion II
+### Testing for Overdispersion II
 ```{r}
 dispersiontest(bhat_pois)
 ```
 
 Given the *p*-value, the null hypothesis cannot be rejected. If the data suggests overdispersion, two alternative regression models can be used: (1) Quasi-Poisson and (2) Negative Binomial.
 
-## Quasi-Poisson Regression Model
+### Quasi-Poisson Regression Model
 Dataset `blm` from article [Black Lives Matter: Evidence that Police-Caused Deaths Predict Protest Activity](https://doi.org/10.1017/S1537592717004273). 
 
 - Dependent variable: Total number of protests in a city
@@ -310,7 +310,7 @@ mean(blm$totprotests)
 var(blm$totprotests)
 ```
 
-## Presence of Overdispersion
+### Presence of Overdispersion
 Likely overdispersion due to variance being significantly higher than mean. In a first step, a regular Poisson model is estimated.
 
 ```{r}
@@ -323,7 +323,7 @@ bhat1     = glm(eq1,data=blm,family=poisson)
 bhat2     = glm(eq1,data=blm,family=quasipoisson)
 ```
 
-## Estimation Results
+### Estimation Results
 \tiny
 ```{r,echo=FALSE}
 stargazer(bhat1,bhat2,type="text",no.space=TRUE,single.row=TRUE)
@@ -331,13 +331,13 @@ stargazer(bhat1,bhat2,type="text",no.space=TRUE,single.row=TRUE)
 \normalsize
 Note: Switch of statistical significance for population density 
 
-## Testing for Overdispersion
+### Testing for Overdispersion
 ```{r,echo=FALSE}
 dispersiontest(bhat1)
 ```
 Null hypothesis rejected at 10\% but not 5\% significance level. The Quasi-Poisson Regression Model handles overdispersion by adjusting standard errors but leaving the coefficient estimates the same.
 
-## Negative Binomial Regression Model
+### Negative Binomial Regression Model
 The Negative Binomial Regression Model can be used in the presence of count data and overdispersion. Below, the results from the article [Black Lives Matter: Evidence that Police-Caused Deaths Predict Protest Activity](https://doi.org/10.1017/S1537592717004273) are recreated using the negative binomial models presented in the paper. 
 
 Three models:
@@ -346,14 +346,14 @@ Three models:
 2. Adding black death
 3. Adding all police-caused deaths instead (victims of any race)
 
-## BLM Models
+### BLM Models
 ```{r}
 bhat3 = glm.nb(eq1,data=blm,link=log)
 bhat4 = glm.nb(eq2,data=blm,link=log)
 bhat5 = glm.nb(eq3,data=blm,link=log)
 ```
 
-## BLM Model Results
+### BLM Model Results
 \tiny
 ```{r,echo=FALSE}
 stargazer(bhat3,bhat4,bhat5,type="text",no.space=TRUE,single.row=TRUE)
@@ -361,7 +361,7 @@ stargazer(bhat3,bhat4,bhat5,type="text",no.space=TRUE,single.row=TRUE)
 \normalsize
 
 # Hurdle and Zero-Inflation Models
-## Overview
+### Overview
 Problem:
 
 - Presence of many observations at 0 in count data
@@ -378,7 +378,7 @@ Application of hurdle and zero-inflated models:
 - Outcome of interest: Number of doctor $visits$ 
 - Independent variables: $hospital$ (number of hospital visits), $health$ (self-indicated health status), $chronic$ (number of chronic conditions), $gender$, $school$, and $insurance$. 
 
-## Estimation
+### Estimation
 ```{r}
 eq             = visits~hospital+health+chronic+gender+
                   school+insurance
@@ -388,7 +388,7 @@ bhat_hurdle    = hurdle(eq,data=NMES1988,dist="negbin")
 bhat_zi        = zeroinfl(eq,data=NMES1988)
 ```
 
-## Results
+### Results
 \tiny
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 stargazer(bhat_pois,bhat_nb,bhat_hurdle,bhat_zi,type="text",no.space=TRUE,omit.stat=c("ll","aic"))
@@ -396,7 +396,7 @@ stargazer(bhat_pois,bhat_nb,bhat_hurdle,bhat_zi,type="text",no.space=TRUE,omit.s
 \normalsize
 
 # Survival Models
-## Overview
+### Overview
 Length of time until a certain event occurs and variables influencing time passed (also known as time-to-event data analysis). Examples:
 
 - Time to failure of mechanical device
@@ -408,14 +408,14 @@ Data used for this topic
 
 - `rossi`
 
-## Theoretical Aspects
+### Theoretical Aspects
 $T$ as a random variable representing survival time with the cumulative distribution function written as: 
 $$F(t)=Pr(T \leq t)$$
 where $t$ is a realization of $T$. Survival function as the complement probability (at least $t$)  :
 $$S(t)=1-F(t)=Pr(T \geq t)$$
 Hazard function or hazard rate $h(t)$ as risk of failure at time $t$.
 
-## Example Data `rossi`
+### Example Data `rossi`
 Experimental recidivism study on 432 male prisoners over a period of one year after release from prison ([Rossi et al., 1980](https://doi.org/10.1016/C2013-0-11412-2)):
 
 - $week$: Week of first arrest after release
@@ -429,7 +429,7 @@ Experimental recidivism study on 432 male prisoners over a period of one year af
 - $prio$: Number of prior convictions.
 - $educ$: Education coded as 2 (grade 6 or less), 3 (grades 6-9), 4 (grades 10-11), 5 (grade 12), or 6 (some post-secondary).
 
-## Analysis
+### Analysis
 Number of prisoners rearrested during study period:
 ```{r}
 sum(rossi$arrest)
@@ -443,27 +443,27 @@ ggsurvplot(bhatmar,pval=TRUE,risk.table=TRUE)
 ggsurvplot(bhatfin,pval=TRUE,risk.table=TRUE)
 ```
 
-## Survival Curve: Marriage
+### Survival Curve: Marriage
 ```{r,echo=FALSE,fig.width=10,fig.height=5}
 ggsurvplot(bhatmar,pval=TRUE,conf.int=TRUE,risk.table=TRUE)
 ```
 
-## Survival Curve: Financial Aid
+### Survival Curve: Financial Aid
 ```{r,echo=FALSE,fig.width=10,fig.height=5}
 ggsurvplot(bhatfin,pval=TRUE,conf.int=TRUE,risk.table=TRUE)
 ```
 
-## Cumulative Hazard Function: Marriage
+### Cumulative Hazard Function: Marriage
 ```{r,echo=FALSE,fig.width=10,fig.height=5}
 ggsurvplot(bhatmar,pval=TRUE,conf.int=TRUE,fun="cumhaz")
 ```
 
-## Cumulative Hazard Function: Financial Aid
+### Cumulative Hazard Function: Financial Aid
 ```{r,echo=FALSE,fig.width=10,fig.height=5}
 ggsurvplot(bhatfin,pval=TRUE,conf.int=TRUE,fun="cumhaz")
 ```
 
-## Cox Regression in R: Setup
+### Cox Regression in R: Setup
 ```{r}
 bhat1 = coxph(Surv(week,arrest)~mar,data=rossi)
 bhat2 = coxph(Surv(week,arrest)~mar+fin,data=rossi)
@@ -475,7 +475,7 @@ Statistically insignificant variables excluded from regression output on next sl
 
 - In general, all variables must be reported! 
 
-## Cox Regression in R: Results
+### Cox Regression in R: Results
 \tiny
 ```{r,echo=FALSE}
 stargazer(bhat1,bhat2,bhat3,type="text",no.space=TRUE,omit=c("paroyes","raceother","wexpyes"))
@@ -488,7 +488,7 @@ knitr::knit_exit()
 
 
 
-## Exercise
+### Exercise
 Consider the following data set:
 ```{r}
 data(cancer,package="survival")

@@ -12,53 +12,102 @@ linkcolor: MidnightBlue
 ---
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
-load("G:/My Drive/Teaching/Data Analysis for Public Affairs/GitHub/DataAnalysisPAData.RData")
+library(ggplot2)
+library(reshape2)
+load("D:/Teaching/Data Analysis for Public Affairs/Data/DataAnalysisPAData.RData")
 ```
 
-## Overview
-Packages:
-        
-- [mfx](https://cran.r-project.org/web/packages/mfx/index.html)
-
-Binary choice models
+### Overview
+Binary choice models and possible research questions
 
 - Did you vote during the last election?
-- Does an individual get arrested again after being released from prison?
-- Participation in the labor market
-- Purchasing a home
-- Model: $Pr(y=1|x)$
+- Does an individual get arrested after being released from prison?
+- Does an individual participate in the labor market?
 
-Dependent variable $y$ takes one of two values: 0 or 1
+Dependent variable $y$ takes on one of two values: 0 or 1
 
-## Numerical Methods
-Consider the following equation:
-$$y = x^2$$
+# Numerical Methods
+### Example
+Consider the following equations
 
-- What is the value of $y$ if $x=5$?
-- What is the value of $x$ if $y=81$? 
+$$
+\begin{aligned}
+     y &=x^2\\
+     y &=x^2+\sqrt{x}
+\end{aligned}
+$$
 
-Next, consider the following equation:
-$$y=x^2+\sqrt{x}$$
+Questions
 
-- What is the value of $y$ if $x=9$?
-- What is the value of $x$ if $y=84$? 
+- What is the value of $y$ if $x=4$ or $x=9$?
+- What is the value of $x$ if $y=81$ or $x=14$? 
 
-## Linear Probability Model
-Most rudimentary model: Linear probability model (LPM)
+Need for numerical methods to determine the answer to the last question more generally for the second equation
 
-- Use the linear regression model $y_i=\beta_0+\beta_1 \cdot x_i + \epsilon$
-- Problem: Possibility of $E(y_i|x_i)>1$ or $E(y_i|x_i)<0$
-- It can be shown that disturbance terms are not normally distributed and there is heteroscedastic.
+# Theoretical Concepts
+### Sample Binary Choice Data from the GSS
+```{r,echo=FALSE,fig.dim=c(5,3)}
+df        = subset(gss,year==2022 & owngun %in% c(1,2) & vote20 %in% c(1,2),select=c("age","owngun","vote20"))
+df        = na.omit(df)
+df$owngun = ifelse(df$owngun==1,1,0)
+df$vote20 = ifelse(df$owngun==1,1,0)
+df        = melt(df,id=c("age"))
+df        = df[sample(nrow(df),100),]
+ggplot(df,aes(x=age,y=value))+geom_point()+facet_wrap(vars(variable))+theme_bw()+
+     xlab("Age")+ylab("Outcome")
+```
 
-Alternative: Model that calculates the probability of observing a 1.
+### Linear Probability Model (LPM)
+Most rudimentary model for binary choice
 
-- Logit and Probit models
+- Use of linear regression model, i.e., $y_i=\beta_0+\beta_1 \cdot x_i+\epsilon$
 
-## Logit and Probit Models
-General assumption about some function $G(\cdot)$: $0 \leq G(z) \leq 1$ for all values of $z$. Let
-$$z=\beta_0+\beta_1 \cdot x_1 + \cdots + \beta_k \cdot x_k$$
+Problems
+
+- Possibility of $E(y_i|x_i)>1$ or $E(y_i|x_i)<0$
+- Error terms are neither normally distributed nor homoscedastic
+
+Alternative: Logit and Probit
+
+- Calculation of the probability that the outcome equals 1 given exogenous variables, i.e, $Pr(y=1|x)$
+
+### Common Setup for Logit and Probit Models
+General assumption about some function $G(\cdot)$ for all values of $z$
+$$0 \leq G(z) \leq 1$$
+Let
+$$z=\beta_0+\beta_1 \cdot x_1+\cdots+\beta_k \cdot x_k$$
 Then, we have
 $$P(y=1|x)=G(\beta_0+\beta_1 \cdot x_1 + \cdots + \beta_k \cdot x_k)$$
+
+### Logit Model
+Remember the Bernoulli distribution from statistics:
+$$
+\begin{aligned}
+     Pr(y=1) &=p\\
+     Pr(y=0) &=1-p
+\end{aligned}
+$$
+with $E(y)=p$. Use of the cumulative logistic distribution function leading to the following for the logit model
+$$Pr(y=1)=G(z)=\frac{e^z}{1+e^z}=\frac{1}{1+e^{-z}}$$
+where $z=\beta_0+\beta_1 \cdot x_1+\cdots+\beta_k \cdot x_k$
+
+### Probit Model
+Instead of using the cumulative logistic distribution, the probit model uses the cumulative normal distribution:
+$$G(z)=\Phi(z)$$
+Both models lead to similar results (not similar coefficients) and are solved using so-called maximum likelihood estimation (MLE)
+
+## Example using `organic`
+Data description
+        
+- $income$ of the respondent in \$ 1,000
+- $buying$ of organic food: yes (1) or no (0)
+        
+Results of interest for the binary choice model (for other models as well)
+        
+- Coefficient estimates
+- Marginal effects
+- Predicted probabilities
+
 Notes
 
 - Estimation through Maximum Likelihood
@@ -75,31 +124,6 @@ plot(organic,xlim=c(0,100))
 abline(bhat_ols)
 lines(income,logit_cdf,type="l")
 ```
-
-## Logit Model
-Remember the Bernoulli distribution from statistics:
-$$Pr(Y=1)=p$$
-$$Pr(Y=0)=1-p$$
-with $E(y)=p$. For the logit model we have the following:
-$$Pr(y=1) = G(z) = \frac{e^z}{1+e^z}=\frac{1}{1+e^{-z}}$$
-where $z=\beta_0+\beta_1 \cdot x$.
-
-## Probit Model
-Instead of using the cumulative logistic distribution, the probit model uses the cumulative normal distribution:
-$$G(z)=\Phi(z)$$
-Both models lead to similar results (not similar coefficients!).
-
-## Example using `organic`
-Data description
-        
-- $income$ of the respondent in \$ 1,000
-- $buying$ of organic food: yes (1) or no (0)
-        
-Results of interest for the binary choice model (for other models as well)
-        
-- Coefficient estimates
-- Marginal effects
-- Predicted probabilities
 
 # Coefficicent Estimates
 ## Estimation with R
